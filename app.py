@@ -7,7 +7,7 @@ try:
     st.subheader("Mapa de áreas interactivas")
 
     # Cargar datos (mismo Excel)
-    EXCEL_URL = 'https://vertivco-my.sharepoint.com/:x:/r/personal/miguel_carranza_vertivco_com/Documents/roles_areas.xlsx?d=w8bcf3771d30b4eeeaad67ff1d9121bb5&csf=1&web=1&e=ahXvbC'
+    EXCEL_URL = 'https://github.com/MiguelCarranza414/Mapa-Interativo/blob/master/data/roles_areas.xlsx'
     df = pd.read_excel(EXCEL_URL)
 
     # Mapa SVG embebido
