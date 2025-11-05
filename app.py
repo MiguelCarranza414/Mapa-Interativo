@@ -7,7 +7,7 @@ try:
     st.subheader("Mapa de áreas interactivas")
 
     # Cargar datos (mismo Excel)
-    EXCEL_URL = 'C:/Inventario/data/roles_areas.xlsx'
+    EXCEL_URL = '/data/roles_areas.xlsx'
     df = pd.read_excel(EXCEL_URL)
 
     # Mapa SVG embebido
@@ -19,21 +19,29 @@ try:
     <div id="svg-container">{svg_content}</div>
     <script>
     const svg = document.querySelector('#svg-container svg');
-    svg.querySelectorAll('rect').forEach(area => {{
+    svg.querySelectorAll('rect, path, polygon, g').forEach(area => {{
         area.addEventListener('click', () => {{
-        const areaId = area.id;
-        window.parent.postMessage({{type: 'areaClick', area: areaId}}, '*');
+            const areaId = area.id;
+            const streamlitEvent = new CustomEvent("streamlit:setComponentValue", {{
+                detail: areaId
+            }});
+            window.parent.document.dispatchEvent(streamlitEvent);
         }});
     }});
     </script>
     """
 
+
     # Mostrar el SVG con JS
     components.html(html_code, height=500)
 
     # Captura de eventos
-    clicked_area = st.session_state.get("clicked_area", None)
-    st.write("Haz clic en un área del mapa.")
+    clicked_area = components.html(html_code, height=500)
+
+    if clicked_area:
+        st.write(f"Área seleccionada: **{clicked_area}**")
+    else:
+        st.write("Haz clic en un área del mapa.")
 
 except Exception as e:
     input(e)
