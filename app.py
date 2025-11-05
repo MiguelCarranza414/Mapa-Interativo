@@ -7,7 +7,7 @@ st.title("📦 Inventario Anual 2025")
 st.subheader("Mapa de áreas interactivas")
 
 # Cargar datos (mismo Excel)
-EXCEL_URL = '/data/roles_areas.xlsx'
+EXCEL_URL = 'C:/Inventario/data/roles_areas.xlsx'
 df = pd.read_excel(EXCEL_URL)
 
 # Mapa SVG embebido
