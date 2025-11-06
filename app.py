@@ -1,46 +1,103 @@
-import os
-from pathlib import Path
 import streamlit as st
 import pandas as pd
 import streamlit.components.v1 as components
+from pathlib import Path
 
-st.set_page_config(page_title="Inventario 2025", layout="wide")
+st.set_page_config(layout="wide")
 st.title("📦 Inventario Anual 2025")
 st.subheader("Mapa de áreas interactivas")
 
-# --- Rutas seguras relativas al archivo ---
-BASE = Path(__file__).parent
-EXCEL_PATH = BASE / "data" / "roles_areas.xlsx"
-SVG_PATH   = BASE / "data" / "mapa.svg"
+# --- Cache helpers ---
+@st.cache_data(show_spinner=False)
+def load_excel(path: str) -> pd.DataFrame:
+    return pd.read_excel(path)
 
-# --- Diagnóstico rápido si falta algo ---
-missing = []
-if not EXCEL_PATH.exists(): missing.append(str(EXCEL_PATH))
-if not SVG_PATH.exists():   missing.append(str(SVG_PATH))
-if missing:
-    st.error("No se encontraron estos archivos en el servidor:")
-    for m in missing: st.code(m)
-    st.caption("Confirma que están subidos al repo en la carpeta data/ y vuelve a desplegar.")
-    st.write("Contenido de la carpeta actual:", os.listdir(BASE))
-    st.stop()
+@st.cache_data(show_spinner=False)
+def load_svg(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
 
-@st.cache_data
-def load_data(path: Path) -> pd.DataFrame:
-    return pd.read_excel(path)   # requiere openpyxl
-
-df = load_data(EXCEL_PATH)
+# --- Cargar datos ---
+EXCEL_URL = "C:/Inventario/data/roles_areas.xlsx"
+df = None
+try:
+    df = load_excel(EXCEL_URL)
+except Exception as e:
+    st.warning(f"No pude cargar el Excel en {EXCEL_URL}. Detalle: {e}")
 
 # --- Cargar SVG ---
-svg_content = SVG_PATH.read_text(encoding="utf-8")
+SVG_PATH = Path("data/mapa.svg")
+if not SVG_PATH.exists():
+    st.error(f"No se encontró el archivo SVG en {SVG_PATH.resolve()}")
+    st.stop()
 
-# Pequeño estilo de hover para que “se sienta” interactivo
-svg_content = svg_content.replace(
-    "<svg",
-    '<svg><style>.area:hover{opacity:.9;stroke:#111827;stroke-width:2;cursor:pointer}</style>',
-    1
-) if "<style>" not in svg_content else svg_content
+svg_content = load_svg(SVG_PATH)
 
-# Render (sin escuchar clicks aún)
-components.html(f"<div id='svg-container'>{svg_content}</div>", height=520)
+# --- HTML + JS: enviar el id clicado a Streamlit ---
+html_code = f"""
+<div id="svg-container">{svg_content}</div>
+<script>
+(function() {{
+  function init() {{
+    const svg = document.querySelector('#svg-container svg');
+    if (!svg) {{
+       setTimeout(init, 50);
+       return;
+    }}
 
-st.write("Datos cargados:", df.shape)
+    // Haz clickables todos los elementos con id (ajusta a 'rect[id]' si lo prefieres)
+    svg.querySelectorAll('[id]').forEach(el => {{
+      try {{ el.style.cursor = 'pointer'; }} catch (e) {{}}
+      el.addEventListener('click', (ev) => {{
+        // Evita clics múltiples por bubbling
+        ev.stopPropagation();
+        const clickedId = el.id || null;
+        if (window.Streamlit && typeof window.Streamlit.setComponentValue === 'function') {{
+          window.Streamlit.setComponentValue(clickedId);
+          if (typeof window.Streamlit.setFrameHeight === 'function') {{
+            window.Streamlit.setFrameHeight(document.body.scrollHeight);
+          }}
+        }} else {{
+          window.parent.postMessage({{ type: 'areaClick', area: clickedId }}, '*');
+        }}
+      }});
+    }});
+
+    if (window.Streamlit && typeof window.Streamlit.setFrameHeight === 'function') {{
+      window.Streamlit.setFrameHeight(document.body.scrollHeight);
+    }}
+  }}
+  init();
+}})();
+</script>
+"""
+
+# Renderiza el componente y RECIBE el valor cuando hay clic
+clicked_area = components.html(html_code, height=500, scrolling=False)
+
+st.write("👉 Haz clic en un área del mapa (cualquier elemento con atributo `id`).")
+
+if clicked_area:
+    st.session_state["clicked_area"] = clicked_area
+    st.success(f"Área seleccionada: **{clicked_area}**")
+
+    if df is not None:
+        # Detecta columna 'Area' sin sensib. a mayúsculas
+        col_name = next((c for c in df.columns if str(c).strip().lower() == "area"), None)
+
+        if col_name:
+            filtered = df[df[col_name].astype(str) == str(clicked_area)]
+
+            if filtered.empty:
+                st.info("No hay coincidencias para el área seleccionada.")
+            else:
+                st.caption("Filtrado por área seleccionada:")
+                st.dataframe(filtered, use_container_width=True)
+                # Descarga opcional
+                csv = filtered.to_csv(index=False).encode("utf-8")
+                st.download_button("Descargar filtrado (CSV)", csv, file_name=f"inventario_{clicked_area}.csv", mime="text/csv")
+        else:
+            st.info("El Excel no tiene una columna llamada 'Area'. Si la agregas, mostraré aquí el filtro.")
+else:
+    last = st.session_state.get("clicked_area")
+    if last:
+        st.info(f"Última área seleccionada (sesión): **{last}**")
