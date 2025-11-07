@@ -82,7 +82,7 @@ if clicked_area:
 
     if df is not None:
         # Detecta columna 'Area' sin sensib. a mayúsculas
-        col_name = next((c for c in df.columns if str(c).strip().lower() == "area"), None)
+        col_name = next((c for c in df.columns if str(c).strip().lower() == "Location"), None)
 
         if col_name:
             filtered = df[df[col_name].astype(str) == str(clicked_area)]
