@@ -1,13 +1,18 @@
-import streamlit as st
-import pandas as pd
-import streamlit.components.v1 as components
+import unicodedata
 from pathlib import Path
+import pandas as pd
+import streamlit as st
+import streamlit.components.v1 as components
+
+# === RUTAS ===
+EXCEL_PATH = r"C:\Inventario\data\roles_areas.xlsx"   # <- tu ruta
+SVG_PATH   = Path("data/mapa.svg")                    # <- tu ruta
 
 st.set_page_config(layout="wide")
 st.title("📦 Inventario Anual 2025")
 st.subheader("Mapa de áreas interactivas")
 
-# --- Cache helpers ---
+# === Helpers ===
 @st.cache_data(show_spinner=False)
 def load_excel(path: str) -> pd.DataFrame:
     return pd.read_excel(path)
@@ -16,92 +21,204 @@ def load_excel(path: str) -> pd.DataFrame:
 def load_svg(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
-# --- Cargar datos ---
-EXCEL_URL = "C:/Inventario/data/roles_areas.xlsx"
-df = None
-try:
-    df = load_excel(EXCEL_URL)
-except Exception as e:
-    st.warning(f"No pude cargar el Excel en {EXCEL_URL}. Detalle: {e}")
+def normalize_key(s: str) -> str:
+    if s is None:
+        return ""
+    s = str(s).strip()
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))
+    s = s.replace(" ", "_")
+    return s.upper()
 
-# --- Cargar SVG ---
-SVG_PATH = Path("data/mapa.svg")
+# === Carga datos ===
+try:
+    df = load_excel(EXCEL_PATH)
+except Exception as e:
+    st.error(f"❌ No pude cargar el Excel: {e}")
+    st.stop()
+
 if not SVG_PATH.exists():
-    st.error(f"No se encontró el archivo SVG en {SVG_PATH.resolve()}")
+    st.error(f"❌ No encontré el SVG en {SVG_PATH.resolve()}")
     st.stop()
 
 svg_content = load_svg(SVG_PATH)
 
-# --- Leer parámetro de URL (Streamlit 1.30+: st.query_params; en versiones anteriores usa experimental_) ---
-try:
-    qp = st.query_params  # >= 1.30
-    clicked_area = qp.get("area", [None])[0] if isinstance(qp.get("area"), list) else qp.get("area")
-except Exception:
-    qp = st.experimental_get_query_params()  # fallback
-    clicked_area = qp.get("area", [None])[0]
+# Detectar columna Location (case/acentos-insensible)
+location_col = None
+for c in df.columns:
+    if normalize_key(c) == "LOCATION":
+        location_col = c
+        break
+if not location_col:
+    st.error("❌ Tu Excel debe tener una columna llamada exactamente **Location**.")
+    st.stop()
 
-# --- HTML + JS: al hacer click, actualizar ?area=ID ---
-html_code = f"""
-<div id="svg-container">{svg_content}</div>
+df["_LOCATION_KEY_"] = df[location_col].map(normalize_key)
+
+# Leer ?area=
+def get_clicked():
+    try:
+        qp = st.query_params
+        val = qp.get("area")
+        return val[0] if isinstance(val, list) else val
+    except Exception:
+        qp = st.experimental_get_query_params()
+        return qp.get("area", [None])[0]
+
+clicked_area_raw = get_clicked()
+clicked_area_key = normalize_key(clicked_area_raw) if clicked_area_raw else None
+
+# === HTML + JS robusto ===
+html = f"""
+<div id="svg-wrap" style="position:relative;">
+  {svg_content}
+  <div id="last-click" style="
+    position:absolute; right:8px; bottom:8px;
+    background:#111827; color:#fff; border:1px solid #374151;
+    padding:6px 10px; border-radius:999px; font-size:12px; display:none;">
+  </div>
+</div>
+
 <script>
 (function() {{
-  function init() {{
-    const svg = document.querySelector('#svg-container svg');
-    if (!svg) {{
-       setTimeout(init, 50);
-       return;
-    }}
+  function ready(fn) {{
+    if (document.readyState !== 'loading') fn();
+    else document.addEventListener('DOMContentLoaded', fn);
+  }}
 
-    // Hacer "clicables" todos los elementos con atributo id
-    svg.querySelectorAll('[id]').forEach(el => {{
-      try {{ el.style.cursor = 'pointer'; }} catch (e) {{}}
-      el.addEventListener('click', (ev) => {{
-        ev.stopPropagation();
-        const clickedId = el.id || null;
-        if (!clickedId) return;
-        const url = new URL(window.location.href);
-        url.searchParams.set('area', clickedId);
-        // Navega (recarga la app con el query param)
-        window.location.href = url.toString();
-      }});
+  function setTopLocation(url) {{
+    try {{
+      // Intento 1: navegar el padre directamente
+      window.parent.location.href = url;
+      return true;
+    }} catch (e) {{}}
+    try {{
+      // Intento 2: usar un <a target="_top">
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_top';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return true;
+    }} catch (e) {{}}
+    return false;
+  }}
+
+  function markClickable(el) {{
+    try {{ el.style.cursor = 'pointer'; }} catch (e) {{}}
+    el.addEventListener('click', function(ev) {{
+      ev.stopPropagation();
+      const key = el.getAttribute('data-area') || el.id || '';
+      if (!key) return;
+
+      // Muestra feedback local inmediato dentro del iframe (debug)
+      const chip = document.getElementById('last-click');
+      if (chip) {{
+        chip.textContent = 'Click: ' + key;
+        chip.style.display = 'inline-block';
+      }}
+
+      // Actualiza ?area= en la URL del documento padre
+      const topUrl = new URL(window.parent.location.href);
+      topUrl.searchParams.set('area', key);
+      const ok = setTopLocation(topUrl.toString());
+      if (!ok) {{
+        console.log('No se pudo navegar el documento padre.');
+      }}
     }});
   }}
-  init();
+
+  function init() {{
+    const svg = document.querySelector('#svg-wrap svg');
+    if (!svg) {{ setTimeout(init, 60); return; }}
+
+    let clickable = svg.querySelectorAll('[data-area], .area');
+    if (!clickable || clickable.length === 0) {{
+      // Modo compatibilidad: prueba con cualquier [id] visible que no sea el fondo
+      clickable = Array.from(svg.querySelectorAll('[id]'))
+        .filter(el => el.tagName.toLowerCase() !== 'svg')
+        .filter(el => !(el.getAttribute('class')||'').includes('bg'))
+        .filter(el => (el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0));
+    }}
+    clickable.forEach(markClickable);
+  }}
+
+  ready(init);
 }})();
 </script>
 """
 
-components.html(html_code, height=600, scrolling=False)
 
-st.write("👉 Haz clic en un área del mapa (cualquier elemento con atributo `id`).")
+components.html(html, height=700, scrolling=False)
+st.caption("👉 Haz clic en un área. (Si no ves la “manita”, este bloque fuerza el cursor por JS)")
+# --- MOSTRAR NOMBRE DEL ÁREA (desde el SVG) ---
+import xml.etree.ElementTree as ET
 
-# --- Mostrar selección y filtrar Excel ---
-if clicked_area:
-    st.success(f"Área seleccionada: **{clicked_area}**")
+def get_svg_title(svg_text: str, area_key: str) -> str:
+    """Busca <g data-area="..."><title>...</title></g> y devuelve el texto del title si existe."""
+    if not svg_text or not area_key:
+        return area_key or ""
+    try:
+        # Manejo de namespace SVG
+        ns = {"svg": "http://www.w3.org/2000/svg"}
+        root = ET.fromstring(svg_text)
 
-    if df is not None:
-        # Buscar la columna "Location" sin sensibilidad a mayúsculas/minúsculas
-        col_name = next((c for c in df.columns if str(c).strip().lower() == "location"), None)
+        # Busca cualquier elemento con data-area == area_key
+        # (normalmente será un <g>, pero dejamos genérico)
+        for el in root.iter():
+            if el.attrib.get("data-area") == area_key:
+                # Busca un hijo <title>
+                for child in el:
+                    # Tag sin o con namespace
+                    tag = child.tag.split('}')[-1]
+                    if tag == "title" and (child.text or "").strip():
+                        return child.text.strip()
+                # Si no hay <title>, devolvemos la clave
+                return area_key
+    except Exception:
+        pass
+    return area_key
 
-        if col_name:
-            filtered = df[df[col_name].astype(str) == str(clicked_area)]
-            if filtered.empty:
-                st.info("No hay coincidencias para el área seleccionada.")
-            else:
-                st.caption("Filtrado por área seleccionada:")
-                st.dataframe(filtered, use_container_width=True)
+# Muestra lo cliqueado (aunque no haya Excel):
+if clicked_area_raw:
+    # Título amigable desde el SVG (si existe), si no, usa la clave tal cual
+    area_label = get_svg_title(svg_content, clicked_area_raw) or clicked_area_raw
 
-                csv = filtered.to_csv(index=False).encode("utf-8")
-                st.download_button(
-                    "Descargar filtrado (CSV)",
-                    csv,
-                    file_name=f"inventario_{clicked_area}.csv",
-                    mime="text/csv"
-                )
-        else:
-            st.info(
-                "El Excel no tiene una columna llamada 'Location'. "
-                "Renómbrala exactamente a 'Location' para que funcione el filtro."
-            )
+    st.markdown(
+        f"""
+        <div style="
+          display:inline-block;
+          padding:8px 12px;
+          border-radius:999px;
+          background:#1f2937;
+          color:white;
+          font-weight:600;
+          border:1px solid #4b5563;
+          margin:6px 0;
+        ">
+          Área clickeada (SVG): {area_label}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.info("Aún no has seleccionado un área (desde el SVG).")
+
+# === Resultado del clic ===
+if clicked_area_raw:
+    st.success(f"Área seleccionada: **{clicked_area_raw}**")
+    filt = df[df["_LOCATION_KEY_"] == clicked_area_key]
+    if filt.empty:
+        st.info("No hay coincidencias para esa área en tu Excel.")
+    else:
+        st.dataframe(filt.drop(columns=["_LOCATION_KEY_"]), use_container_width=True)
+        csv = filt.drop(columns=["_LOCATION_KEY_"]).to_csv(index=False).encode("utf-8")
+        st.download_button(
+            "⬇️ Descargar (CSV)",
+            csv,
+            file_name=f"inventario_{normalize_key(clicked_area_raw)}.csv",
+            mime="text/csv",
+        )
 else:
     st.info("Aún no has seleccionado un área.")

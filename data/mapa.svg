@@ -1,95 +1,275 @@
-<svg width="1289" height="392" viewBox="0 0 1289 392" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="1289" height="392" fill="#0E1117"/>
-<rect id="Shipping" x="0.5" y="6.5" width="99" height="320" fill="#0E1117" stroke="white"/>
-<rect id="DA 2" x="266.5" y="51.5" width="148" height="21" fill="#0E1117" stroke="white"/>
-<rect id="XDM" x="266.5" y="72.5" width="148" height="21" fill="#0E1117" stroke="white"/>
-<rect id="XDU" x="266.5" y="111.5" width="232" height="47" fill="#0E1117" stroke="white"/>
-<g id="Plenum">
-<rect id="Plenum_2" x="419.5" y="74.5" width="100" height="19" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 20" x="524.5" y="74.5" width="48" height="19" fill="#0E1117" stroke="white"/>
-</g>
-<rect id="Sub assy" x="573.5" y="51.5" width="67" height="42" fill="#0E1117" stroke="white"/>
-<g id="Compressors DA">
-<rect id="Compressors DA_2" x="419.5" y="51.5" width="100" height="21" fill="#0E1117" stroke="white"/>
-<path id="Inox" d="M524.5 51.5H572.5V72.5H524.5V51.5Z" fill="#0E1117" stroke="white"/>
-</g>
-<g id="AFC">
-<rect id="AFC_2" x="107.5" y="5.5" width="61" height="36" fill="#0E1117" stroke="white"/>
-<rect id="AFC2" x="266.799" y="6.5" width="373.701" height="39" fill="#0E1117" stroke="white"/>
-<rect id="AFC EOL" x="168.5" y="5.5" width="86" height="45" fill="#0E1117" stroke="white"/>
-</g>
-<rect id="XDM XDU" x="107.5" y="111.5" width="57" height="47" fill="#0E1117" stroke="white"/>
-<rect id="EOL XDM-XDU Under constr" x="168.5" y="111.5" width="86" height="47" fill="#0E1117" stroke="white"/>
-<g id="SKID">
-<rect id="Rectangle 26" x="266.799" y="166.5" width="373.701" height="37" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 12" x="107.5" y="166.5" width="147.276" height="37" fill="#0E1117" stroke="white"/>
-</g>
-<g id="DH 400">
-<rect id="DH 400_2" x="266.799" y="278.5" width="373.701" height="48" fill="#0E1117" stroke="white"/>
-<rect id="DH 400_3" x="107.5" y="278.5" width="147.276" height="48" fill="#0E1117" stroke="white"/>
-<rect id="DH 400_4" x="266.799" y="224.5" width="373.701" height="37" fill="#0E1117" stroke="white"/>
-<rect id="DH 400_5" x="107.5" y="225.5" width="147.276" height="37" fill="#0E1117" stroke="white"/>
-</g>
-<rect id="Rectangle 3" x="107.5" y="51.5" width="57" height="42" fill="#0E1117" stroke="white"/>
-<rect id="Gly col flushing" x="503.5" y="111.5" width="60" height="47" fill="#0E1117" stroke="white"/>
-<rect id="XDU 150" x="563.5" y="111.5" width="77" height="47" fill="#0E1117" stroke="white"/>
-<rect id="DA" x="168.5" y="51.5" width="86" height="21" fill="#0E1117" stroke="white"/>
-<rect id="XDM_2" x="168.5" y="72.5" width="86" height="21" fill="#0E1117" stroke="white"/>
-<rect id="XDU 100" x="660.5" y="122.5" width="89" height="28" fill="#0E1117" stroke="white"/>
-<path id="Frame Access" d="M660.5 0.5H687.5V48.5H660.5V0.5Z" fill="#0E1117" stroke="white"/>
-<g id="Sub assy AFC">
-<rect id="Rectangle 30" x="687.5" y="6.5" width="62" height="39" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 31" x="660.5" y="52.5" width="89" height="31" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 32" x="660.5" y="87.5" width="43" height="28" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 33" x="706.5" y="87.5" width="43" height="28" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 35" x="757.5" y="6.5" width="34" height="77" fill="#0E1117" stroke="white"/>
-</g>
-<rect id="Kits" x="757.5" y="87.5" width="34" height="63" fill="#0E1117" stroke="white"/>
-<rect id="MRB" x="1169.5" y="111.5" width="106" height="41" fill="#0E1117" stroke="white"/>
-<rect id="MC" x="660.5" y="166.5" width="161" height="26" fill="#0E1117" stroke="white"/>
-<rect id="Condensers" x="660.5" y="221.5" width="251" height="57" fill="#0E1117" stroke="white"/>
-<g id="Sub assy Condensers">
-<rect id="Rectangle 40" x="660.5" y="197.5" width="161" height="17" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 42" x="827.5" y="166.5" width="48" height="48" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 43" x="884.5" y="166.5" width="27" height="48" fill="#0E1117" stroke="white"/>
-</g>
-<g id="CR">
-<rect id="CR_2" x="779.5" y="286.5" width="75" height="16" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 48" x="759.5" y="286.5" width="17" height="16" fill="#0E1117" stroke="white"/>
-</g>
-<g id="Inox_2">
-<rect id="INOX" x="660.5" y="286.5" width="78" height="16" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 49" x="741.5" y="286.5" width="16" height="16" fill="#0E1117" stroke="white"/>
-</g>
-<rect id="Blower" x="660.5" y="305.5" width="194" height="24" fill="#0E1117" stroke="white"/>
-<g id="BLW SUb assy">
-<rect id="Rectangle 51" x="859.5" y="286.5" width="24" height="43" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 52" x="886.5" y="286.5" width="25" height="43" fill="#0E1117" stroke="white"/>
-</g>
-<g id="Sheet Metal">
-<rect id="Rectangle 44" x="923.5" y="166.5" width="45" height="92" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 45" x="973.5" y="166.5" width="35" height="92" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 53" x="923.5" y="260.5" width="85" height="20" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 54" x="923.5" y="283.5" width="84" height="25" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 55" x="923.5" y="310.5" width="84" height="19" fill="#0E1117" stroke="white"/>
-</g>
-<g id="EP">
-<rect id="Rectangle 56" x="863.5" y="342.5" width="32" height="49" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 57" x="895.5" y="342.5" width="183" height="49" fill="#0E1117" stroke="white"/>
-</g>
-<g id="WH Piping">
-<rect id="Rectangle 58" x="1023.5" y="166.5" width="52" height="52" fill="#0E1117" stroke="white"/>
-<rect id="Rectangle 59" x="1023.5" y="221.5" width="52" height="23" fill="#0E1117" stroke="white"/>
-</g>
-<rect id="PRE L1" x="1023.5" y="253.5" width="114" height="27" fill="#0E1117" stroke="white"/>
-<rect id="Piping" x="1078.5" y="166.5" width="115" height="78" fill="#0E1117" stroke="white"/>
-<rect id="Prototypes" x="1197.5" y="166.5" width="52" height="78" fill="#0E1117" stroke="white"/>
-<rect id="Hairpin" x="1146.5" y="253.5" width="101" height="27" fill="#0E1117" stroke="white"/>
-<path id="Warehouse" d="M1275.5 0.5V111.5H1169.5V152.5H863.5V45.5H848.5V0.5H1275.5Z" fill="#0E1117" stroke="white"/>
-<path id="Fastenal" d="M848.5 0.5V45.5H863.5V152.5H799.5V0.5H848.5Z" fill="#0E1117" stroke="white"/>
-<path id="Cuchilla" d="M1288.5 183.14L1259.25 280.5H1258.5V166.5H1288.5V183.14Z" fill="#0E1117" stroke="white"/>
-<g id="Coils Shop">
-<path d="M1247.5 319.587L1242.12 337.5H1023.5V283.5H1247.5V319.587Z" fill="#0E1117"/>
-<path d="M1247.5 319.587L1247.98 319.731L1248 319.66V319.587H1247.5ZM1242.12 337.5V338H1242.49L1242.6 337.644L1242.12 337.5ZM1023.5 337.5H1023V338H1023.5V337.5ZM1023.5 283.5V283H1023V283.5H1023.5ZM1247.5 283.5H1248V283H1247.5V283.5ZM1247.5 319.587L1247.02 319.443L1241.64 337.356L1242.12 337.5L1242.6 337.644L1247.98 319.731L1247.5 319.587ZM1242.12 337.5V337H1023.5V337.5V338H1242.12V337.5ZM1023.5 337.5H1024V283.5H1023.5H1023V337.5H1023.5ZM1023.5 283.5V284H1247.5V283.5V283H1023.5V283.5ZM1247.5 283.5H1247V319.587H1247.5H1248V283.5H1247.5Z" fill="white"/>
-</g>
+<svg viewBox="0 0 1289 392" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill:#0E1117; }
+    .stroke { fill:#0E1117; stroke:white; }
+    .area { cursor:pointer; }
+    .area:hover .stroke { stroke-width:2.5; }
+  </style>
+
+  <!-- Fondo no clickeable -->
+  <rect class="bg" x="0" y="0" width="1289" height="392"/>
+
+  <!-- SHIPPING -->
+  <g class="area" data-area="Shipping">
+    <title>Shipping</title>
+    <rect class="stroke" x="0.5" y="6.5" width="99" height="320"/>
+  </g>
+
+  <!-- DA_2 -->
+  <g class="area" data-area="DA_2">
+    <title>DA 2</title>
+    <rect class="stroke" x="266.5" y="51.5" width="148" height="21"/>
+  </g>
+
+  <!-- XDM -->
+  <g class="area" data-area="XDM">
+    <title>XDM</title>
+    <rect class="stroke" x="266.5" y="72.5" width="148" height="21"/>
+  </g>
+
+  <!-- XDU -->
+  <g class="area" data-area="XDU">
+    <title>XDU</title>
+    <rect class="stroke" x="266.5" y="111.5" width="232" height="47"/>
+  </g>
+
+  <!-- PLENUM (compuesta) -->
+  <g class="area" data-area="Plenum">
+    <title>Plenum</title>
+    <path class="stroke" d="M419.5 74.5H519.5V93.5H419.5V74.5Z"/>
+    <path class="stroke" d="M524.5 74.5H572.5V93.5H524.5V74.5Z"/>
+  </g>
+
+  <!-- Subassy -->
+  <g class="area" data-area="Subassy">
+    <title>Subassy</title>
+    <rect class="stroke" x="573.5" y="51.5" width="67" height="42"/>
+  </g>
+
+  <!-- Compressors_DA (compuesta) -->
+  <g class="area" data-area="Compressors_DA">
+    <title>Compressors DA</title>
+    <path class="stroke" d="M419.5 51.5H519.5V72.5H419.5V51.5Z"/>
+    <path class="stroke" d="M524.5 51.5H572.5V72.5H524.5V51.5Z"/>
+  </g>
+
+  <!-- AFC (compuesta) -->
+  <g class="area" data-area="AFC">
+    <title>AFC</title>
+    <path class="stroke" d="M107.5 5.5H168.5V41.5H107.5V5.5Z"/>
+    <path class="stroke" d="M266.799 6.5H640.5V45.5H266.799V6.5Z"/>
+    <path class="stroke" d="M168.5 5.5H254.5V50.5H168.5V5.5Z"/>
+  </g>
+
+  <!-- XDM_XDU -->
+  <g class="area" data-area="XDM_XDU">
+    <title>XDM XDU</title>
+    <rect class="stroke" x="107.5" y="111.5" width="57" height="47"/>
+  </g>
+
+  <!-- EOL_XDM_XDU_UnderConstr -->
+  <g class="area" data-area="EOL_XDM_XDU_UnderConstr">
+    <title>EOL XDM-XDU (Under Constr)</title>
+    <rect class="stroke" x="168.5" y="111.5" width="86" height="47"/>
+  </g>
+
+  <!-- SKID (compuesta) -->
+  <g class="area" data-area="SKID">
+    <title>SKID</title>
+    <path class="stroke" d="M266.799 166.5H640.5V203.5H266.799V166.5Z"/>
+    <path class="stroke" d="M107.5 166.5H254.776V203.5H107.5V166.5Z"/>
+  </g>
+
+  <!-- DH_400 (compuesta) -->
+  <g class="area" data-area="DH_400">
+    <title>DH 400</title>
+    <path class="stroke" d="M266.799 278.5H640.5V326.5H266.799V278.5Z"/>
+    <path class="stroke" d="M107.5 278.5H254.776V326.5H107.5V278.5Z"/>
+    <path class="stroke" d="M266.799 224.5H640.5V261.5H266.799V224.5Z"/>
+    <path class="stroke" d="M107.5 225.5H254.776V262.5H107.5V225.5Z"/>
+  </g>
+
+  <!-- (antes Rectangle 3) si es un área real, nómbrala -->
+  <g class="area" data-area="Area_3">
+    <title>Area 3</title>
+    <rect class="stroke" x="107.5" y="51.5" width="57" height="42"/>
+  </g>
+
+  <!-- GlyCol_flushing -->
+  <g class="area" data-area="GlyCol_flushing">
+    <title>GlyCol flushing</title>
+    <rect class="stroke" x="503.5" y="111.5" width="60" height="47"/>
+  </g>
+
+  <!-- XDU_150 -->
+  <g class="area" data-area="XDU_150">
+    <title>XDU 150</title>
+    <rect class="stroke" x="563.5" y="111.5" width="77" height="47"/>
+  </g>
+
+  <!-- DA -->
+  <g class="area" data-area="DA">
+    <title>DA</title>
+    <rect class="stroke" x="168.5" y="51.5" width="86" height="21"/>
+  </g>
+
+  <!-- XDM_2 -->
+  <g class="area" data-area="XDM_2">
+    <title>XDM 2</title>
+    <rect class="stroke" x="168.5" y="72.5" width="86" height="21"/>
+  </g>
+
+  <!-- XDU_100 -->
+  <g class="area" data-area="XDU_100">
+    <title>XDU 100</title>
+    <rect class="stroke" x="660.5" y="122.5" width="89" height="28"/>
+  </g>
+
+  <!-- Frame_Access -->
+  <g class="area" data-area="Frame_Access">
+    <title>Frame Access</title>
+    <path class="stroke" d="M660.5 0.5H687.5V48.5H660.5V0.5Z"/>
+  </g>
+
+  <!-- Subassy_AFC (compuesta) -->
+  <g class="area" data-area="Subassy_AFC">
+    <title>Subassy AFC</title>
+    <path class="stroke" d="M687.5 6.5H749.5V45.5H687.5V6.5Z"/>
+    <path class="stroke" d="M660.5 52.5H749.5V83.5H660.5V52.5Z"/>
+    <path class="stroke" d="M660.5 87.5H703.5V115.5H660.5V87.5Z"/>
+    <path class="stroke" d="M706.5 87.5H749.5V115.5H706.5V87.5Z"/>
+    <path class="stroke" d="M757.5 6.5H791.5V83.5H757.5V6.5Z"/>
+  </g>
+
+  <!-- Kits -->
+  <g class="area" data-area="Kits">
+    <title>Kits</title>
+    <rect class="stroke" x="757.5" y="87.5" width="34" height="63"/>
+  </g>
+
+  <!-- MRB -->
+  <g class="area" data-area="MRB">
+    <title>MRB</title>
+    <rect class="stroke" x="1169.5" y="111.5" width="106" height="41"/>
+  </g>
+
+  <!-- MC -->
+  <g class="area" data-area="MC">
+    <title>MC</title>
+    <rect class="stroke" x="660.5" y="166.5" width="161" height="26"/>
+  </g>
+
+  <!-- Condensers -->
+  <g class="area" data-area="Condensers">
+    <title>Condensers</title>
+    <rect class="stroke" x="660.5" y="221.5" width="251" height="57"/>
+  </g>
+
+  <!-- Subassy_Condensers (compuesta) -->
+  <g class="area" data-area="Subassy_Condensers">
+    <title>Subassy Condensers</title>
+    <path class="stroke" d="M660.5 197.5H821.5V214.5H660.5V197.5Z"/>
+    <path class="stroke" d="M827.5 166.5H875.5V214.5H827.5V166.5Z"/>
+    <path class="stroke" d="M884.5 166.5H911.5V214.5H884.5V166.5Z"/>
+  </g>
+
+  <!-- CR (compuesta) -->
+  <g class="area" data-area="CR">
+    <title>CR</title>
+    <path class="stroke" d="M779.5 286.5H854.5V302.5H779.5V286.5Z"/>
+    <path class="stroke" d="M759.5 286.5H776.5V302.5H759.5V286.5Z"/>
+  </g>
+
+  <!-- Inox (compuesta) -->
+  <g class="area" data-area="Inox">
+    <title>Inox</title>
+    <path class="stroke" d="M660.5 286.5H738.5V302.5H660.5V286.5Z"/>
+    <path class="stroke" d="M741.5 286.5H757.5V302.5H741.5V286.5Z"/>
+  </g>
+
+  <!-- Blower -->
+  <g class="area" data-area="Blower">
+    <title>Blower</title>
+    <rect class="stroke" x="660.5" y="305.5" width="194" height="24"/>
+  </g>
+
+  <!-- BLW_Subassy (compuesta) -->
+  <g class="area" data-area="BLW_Subassy">
+    <title>BLW Subassy</title>
+    <path class="stroke" d="M859.5 286.5H883.5V329.5H859.5V286.5Z"/>
+    <path class="stroke" d="M886.5 286.5H911.5V329.5H886.5V286.5Z"/>
+  </g>
+
+  <!-- Sheet_Metal (compuesta) -->
+  <g class="area" data-area="Sheet_Metal">
+    <title>Sheet Metal</title>
+    <path class="stroke" d="M923.5 166.5H968.5V258.5H923.5V166.5Z"/>
+    <path class="stroke" d="M973.5 166.5H1008.5V258.5H973.5V166.5Z"/>
+    <path class="stroke" d="M923.5 260.5H1008.5V280.5H923.5V260.5Z"/>
+    <path class="stroke" d="M923.5 283.5H1007.5V308.5H923.5V283.5Z"/>
+    <path class="stroke" d="M923.5 310.5H1007.5V329.5H923.5V310.5Z"/>
+  </g>
+
+  <!-- EP (compuesta) -->
+  <g class="area" data-area="EP">
+    <title>EP</title>
+    <path class="stroke" d="M863.5 342.5H895.5V391.5H863.5V342.5Z"/>
+    <path class="stroke" d="M895.5 342.5H1078.5V391.5H895.5V342.5Z"/>
+  </g>
+
+  <!-- WH_Piping (compuesta) -->
+  <g class="area" data-area="WH_Piping">
+    <title>WH Piping</title>
+    <path class="stroke" d="M1023.5 166.5H1075.5V218.5H1023.5V166.5Z"/>
+    <path class="stroke" d="M1023.5 221.5H1075.5V244.5H1023.5V221.5Z"/>
+  </g>
+
+  <!-- PRE_L1 -->
+  <g class="area" data-area="PRE_L1">
+    <title>PRE L1</title>
+    <rect class="stroke" x="1023.5" y="253.5" width="114" height="27"/>
+  </g>
+
+  <!-- Piping -->
+  <g class="area" data-area="Piping">
+    <title>Piping</title>
+    <rect class="stroke" x="1078.5" y="166.5" width="115" height="78"/>
+  </g>
+
+  <!-- Prototypes -->
+  <g class="area" data-area="Prototypes">
+    <title>Prototypes</title>
+    <rect class="stroke" x="1197.5" y="166.5" width="52" height="78"/>
+  </g>
+
+  <!-- Hairpin -->
+  <g class="area" data-area="Hairpin">
+    <title>Hairpin</title>
+    <rect class="stroke" x="1146.5" y="253.5" width="101" height="27"/>
+  </g>
+
+  <!-- Warehouse -->
+  <g class="area" data-area="Warehouse">
+    <title>Warehouse</title>
+    <path class="stroke" d="M1275.5 0.5V111.5H1169.5V152.5H863.5V45.5H848.5V0.5H1275.5Z"/>
+  </g>
+
+  <!-- Fastenal -->
+  <g class="area" data-area="Fastenal">
+    <title>Fastenal</title>
+    <path class="stroke" d="M848.5 0.5V45.5H863.5V152.5H799.5V0.5H848.5Z"/>
+  </g>
+
+  <!-- Cuchilla -->
+  <g class="area" data-area="Cuchilla">
+    <title>Cuchilla</title>
+    <path class="stroke" d="M1288.5 183.14L1259.25 280.5H1258.5V166.5H1288.5V183.14Z"/>
+  </g>
+
+  <!-- Coils_Shop -->
+  <g class="area" data-area="Coils_Shop">
+    <title>Coils Shop</title>
+    <path class="stroke" d="M1247.5 319.587L1242.12 337.5H1023.5V283.5H1247.5V319.587Z"/>
+  </g>
+
 </svg>
