@@ -32,7 +32,15 @@ if not SVG_PATH.exists():
 
 svg_content = load_svg(SVG_PATH)
 
-# --- HTML + JS: enviar el id clicado a Streamlit ---
+# --- Leer parámetro de URL (Streamlit 1.30+: st.query_params; en versiones anteriores usa experimental_) ---
+try:
+    qp = st.query_params  # >= 1.30
+    clicked_area = qp.get("area", [None])[0] if isinstance(qp.get("area"), list) else qp.get("area")
+except Exception:
+    qp = st.experimental_get_query_params()  # fallback
+    clicked_area = qp.get("area", [None])[0]
+
+# --- HTML + JS: al hacer click, actualizar ?area=ID ---
 html_code = f"""
 <div id="svg-container">{svg_content}</div>
 <script>
@@ -44,60 +52,56 @@ html_code = f"""
        return;
     }}
 
-    // Haz clickables todos los elementos con id (ajusta a 'rect[id]' si lo prefieres)
+    // Hacer "clicables" todos los elementos con atributo id
     svg.querySelectorAll('[id]').forEach(el => {{
       try {{ el.style.cursor = 'pointer'; }} catch (e) {{}}
       el.addEventListener('click', (ev) => {{
-        // Evita clics múltiples por bubbling
         ev.stopPropagation();
         const clickedId = el.id || null;
-        if (window.Streamlit && typeof window.Streamlit.setComponentValue === 'function') {{
-          window.Streamlit.setComponentValue(clickedId);
-          if (typeof window.Streamlit.setFrameHeight === 'function') {{
-            window.Streamlit.setFrameHeight(document.body.scrollHeight);
-          }}
-        }} else {{
-          window.parent.postMessage({{ type: 'areaClick', area: clickedId }}, '*');
-        }}
+        if (!clickedId) return;
+        const url = new URL(window.location.href);
+        url.searchParams.set('area', clickedId);
+        // Navega (recarga la app con el query param)
+        window.location.href = url.toString();
       }});
     }});
-
-    if (window.Streamlit && typeof window.Streamlit.setFrameHeight === 'function') {{
-      window.Streamlit.setFrameHeight(document.body.scrollHeight);
-    }}
   }}
   init();
 }})();
 </script>
 """
 
-# Renderiza el componente y RECIBE el valor cuando hay clic
-clicked_area = components.html(html_code, height=500, scrolling=False)
+components.html(html_code, height=600, scrolling=False)
 
 st.write("👉 Haz clic en un área del mapa (cualquier elemento con atributo `id`).")
 
+# --- Mostrar selección y filtrar Excel ---
 if clicked_area:
-    st.session_state["clicked_area"] = clicked_area
     st.success(f"Área seleccionada: **{clicked_area}**")
 
     if df is not None:
-        # Detecta columna 'Area' sin sensib. a mayúsculas
-        col_name = next((c for c in df.columns if str(c).strip().lower() == "Location"), None)
+        # Buscar la columna "Location" sin sensibilidad a mayúsculas/minúsculas
+        col_name = next((c for c in df.columns if str(c).strip().lower() == "location"), None)
 
         if col_name:
             filtered = df[df[col_name].astype(str) == str(clicked_area)]
-
             if filtered.empty:
                 st.info("No hay coincidencias para el área seleccionada.")
             else:
                 st.caption("Filtrado por área seleccionada:")
                 st.dataframe(filtered, use_container_width=True)
-                # Descarga opcional
+
                 csv = filtered.to_csv(index=False).encode("utf-8")
-                st.download_button("Descargar filtrado (CSV)", csv, file_name=f"inventario_{clicked_area}.csv", mime="text/csv")
+                st.download_button(
+                    "Descargar filtrado (CSV)",
+                    csv,
+                    file_name=f"inventario_{clicked_area}.csv",
+                    mime="text/csv"
+                )
         else:
-            st.info("El Excel no tiene una columna llamada 'Area'. Si la agregas, mostraré aquí el filtro.")
+            st.info(
+                "El Excel no tiene una columna llamada 'Location'. "
+                "Renómbrala exactamente a 'Location' para que funcione el filtro."
+            )
 else:
-    last = st.session_state.get("clicked_area")
-    if last:
-        st.info(f"Última área seleccionada (sesión): **{last}**")
+    st.info("Aún no has seleccionado un área.")
