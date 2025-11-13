@@ -205,4 +205,39 @@ if clicked_area_raw:
 else:
     st.info("Aún no has seleccionado un área (desde el SVG).")
 
+# --- FILTRADO DE DATOS Y VISUALIZACIÓN ---
 
+if clicked_area_key:
+    # 1. Encontrar todas las filas que coincidan con la clave del área (normalizada)
+    #    La columna a buscar es la '_LOCATION_KEY_' que creaste anteriormente.
+    df_filtrado = df[df["_LOCATION_KEY_"] == clicked_area_key]
+
+    if not df_filtrado.empty:
+        st.markdown("---")
+        st.subheader(f"👥 Personal Asignado a: **{area_label}**")
+
+        # Asumiendo que el nombre de la persona está en la columna 'Nombre' (según tu imagen 2)
+        # 2. Extraer la lista de nombres
+        nombres = df_filtrado['Nombre'].unique()
+        
+        # 3. Mostrar los nombres como una lista o tabla
+        if len(nombres) > 0:
+            st.info(f"Se encontraron **{len(nombres)}** entradas de personal.")
+            
+            # Opción A: Mostrar como una lista de viñetas (más limpio para una lista de nombres)
+            st.markdown("##### Lista de Nombres:")
+            for nombre in nombres:
+                st.markdown(f"- **{nombre}**")
+            
+            # Opción B: Mostrar toda la tabla filtrada (útil para ver todos los detalles)
+            with st.expander("Ver tabla completa de registros filtrados"):
+                 # Solo mostrar las columnas relevantes que has indicado en las imágenes:
+                columnas_a_mostrar = ['Número', 'Nombre', 'Activity', location_col, 'Oracle Location']
+                st.dataframe(df_filtrado[columnas_a_mostrar].rename(columns={location_col: "Ubicación Excel"}), 
+                             use_container_width=True)
+
+        else:
+            st.warning("El área está cliqueada, pero no se encontraron nombres asignados en el Excel para esa ubicación.")
+    
+    else:
+        st.warning(f"❌ No se encontraron datos en el Excel para el área **{area_label}**.")
