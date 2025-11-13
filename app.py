@@ -262,7 +262,6 @@ html = f"""
 """
 
 components.html(html, height=700, scrolling=False)
-st.caption("👉 Haz clic en un área. (El JavaScript fuerza el cursor tipo 'manita' sobre las áreas activas)")
 
 # --- VISUALIZACIÓN DE RESULTADOS ---
 
