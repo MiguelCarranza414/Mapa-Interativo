@@ -30,7 +30,7 @@ def load_svg(path: Path) -> str:
 
 def build_display_columns(dataframe: pd.DataFrame, location_column: str) -> list[str]:
     """Devuelve la lista de columnas a mostrar respetando la disponibilidad en el DataFrame."""
-    desired_order = ["Número", "Nombre", "Activity", location_column, "Oracle Location"]
+    desired_order = ["Número", "Nombre", "Activity", location_column, "Oracle Location", "SVG_ID"]
     return [col for col in desired_order if col in dataframe.columns]
 
 def normalize_key(s: str) -> str:
@@ -132,11 +132,26 @@ display_columns = build_display_columns(df, location_col)
 # 5. Leer ?area= (Usando st.query_params, más moderno que st.experimental_get_query_params)
 def get_clicked_area_key():
     """Lee y normaliza el parámetro 'area' de la URL."""
-    # st.query_params devuelve un MultiDict, get("area") devuelve una lista o None
-    area_raw = st.query_params.get("area", [None])[0]
+    qp = st.query_params
+
+    area_raw = None
+
+    if "area" in qp:
+        value = qp["area"]
+        # Streamlit nuevo: string
+        if isinstance(value, str):
+            area_raw = value
+        # Por compatibilidad: lista (versiones anteriores o casos raros)
+        elif isinstance(value, list) and value:
+            area_raw = value[0]
+
     return area_raw, normalize_key(area_raw) if area_raw else None
 
+
 clicked_area_raw, clicked_area_key = get_clicked_area_key()
+st.write("DEBUG query_params:", st.query_params)
+st.write("DEBUG area_raw:", clicked_area_raw)
+st.write("DEBUG area_key:", clicked_area_key)
 
 st.markdown("### 📊 Resumen rápido del inventario")
 col_total, col_names, col_locations = st.columns(3)
@@ -285,6 +300,12 @@ if clicked_area_key:
 
     # 2. Filtrar DataFrame
     # Priorizar coincidencias en las distintas columnas relacionadas con el área
+    st.write(
+    df_filtered[
+        [c for c in ["SVG_ID", "_SVG_ID_KEY_", "_LOCATION_KEY_", location_col] if c in df_filtered.columns]
+    ].head(20)
+)
+
     key_columns = [col for col in ["_SVG_ID_KEY_", "_LOCATION_KEY_", "_ORACLE_LOCATION_KEY_"] if col in df_filtered.columns]
 
     if key_columns:
@@ -320,7 +341,7 @@ if clicked_area_key:
             with st.expander("Ver tabla completa de registros filtrados"):
                 if display_columns:
                     area_table = df_filtrado[display_columns].rename(columns={location_col: "Ubicación Excel"})
-                    st.dataframe(area_table, use_container_width=True)
+                    st.dataframe(area_table, width="stretch")
                 else:
                     st.info("No hay columnas configuradas para mostrar en la tabla detallada.")
 
@@ -348,7 +369,7 @@ if df_filtered.empty:
 else:
     if display_columns:
         filtered_table = df_filtered[display_columns].rename(columns={location_col: "Ubicación Excel"})
-        st.dataframe(filtered_table, use_container_width=True)
+        st.dataframe(filtered_table, width="stretch")
 
         csv_data = filtered_table.to_csv(index=False).encode("utf-8-sig")
         st.download_button(
