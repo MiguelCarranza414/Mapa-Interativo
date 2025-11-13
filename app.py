@@ -28,17 +28,31 @@ def load_svg(path: Path) -> str:
     """Carga el contenido del archivo SVG."""
     return path.read_text(encoding="utf-8")
 
+def build_display_columns(dataframe: pd.DataFrame, location_column: str) -> list[str]:
+    """Devuelve la lista de columnas a mostrar respetando la disponibilidad en el DataFrame."""
+    desired_order = ["Número", "Nombre", "Activity", location_column, "Oracle Location"]
+    return [col for col in desired_order if col in dataframe.columns]
+
 def normalize_key(s: str) -> str:
     """Estandariza una cadena a MAYÚSCULAS sin acentos, con espacios a guiones bajos."""
     if not s:
         return ""
-    
+
     # 1. Normalización a NFKD (separa base de acentos)
     s = unicodedata.normalize("NFKD", str(s).strip())
     # 2. Quitar caracteres combinantes (acentos)
     s = "".join(ch for ch in s if not unicodedata.combining(ch))
     # 3. Reemplazar espacios y poner en mayúsculas
     return s.replace(" ", "_").upper()
+
+def normalize_search_text(value: str) -> str:
+    """Normaliza texto para búsqueda flexible (sin acentos y en minúsculas)."""
+    if not value:
+        return ""
+
+    normalized = unicodedata.normalize("NFKD", str(value).strip())
+    normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
+    return normalized.casefold()
 
 def get_svg_title(svg_text: str, area_key: str) -> str:
     """Busca el título amigable (<title>) dentro de un elemento del SVG."""
@@ -102,6 +116,8 @@ if not location_col:
 # 4. Creación de la Clave de Unión
 df["_LOCATION_KEY_"] = df[location_col].map(normalize_key)
 
+display_columns = build_display_columns(df, location_col)
+
 # 5. Leer ?area= (Usando st.query_params, más moderno que st.experimental_get_query_params)
 def get_clicked_area_key():
     """Lee y normaliza el parámetro 'area' de la URL."""
@@ -110,6 +126,45 @@ def get_clicked_area_key():
     return area_raw, normalize_key(area_raw) if area_raw else None
 
 clicked_area_raw, clicked_area_key = get_clicked_area_key()
+
+st.markdown("### 📊 Resumen rápido del inventario")
+col_total, col_names, col_locations = st.columns(3)
+with col_total:
+    st.metric("Registros en Excel", len(df))
+with col_names:
+    st.metric("Personas únicas", int(df["Nombre"].nunique(dropna=True)))
+with col_locations:
+    st.metric("Áreas registradas", int(df["_LOCATION_KEY_"].nunique(dropna=True)))
+st.caption("Estos totales se calculan directamente desde el archivo Excel cargado.")
+
+with st.sidebar:
+    st.header("🔎 Filtros rápidos")
+    st.caption("Aplica filtros para explorar el personal sin necesidad de hacer clic en el mapa.")
+    name_query = st.text_input("Buscar por nombre")
+
+    activity_options = []
+    if "Activity" in df.columns:
+        activity_options = sorted(df["Activity"].dropna().unique())
+
+    if activity_options:
+        selected_activities = st.multiselect("Filtrar por actividad", activity_options)
+    else:
+        selected_activities = []
+        st.caption("El Excel no incluye una columna 'Activity' para filtrar.")
+
+df_filtered = df.copy()
+
+if name_query:
+    name_token = normalize_search_text(name_query)
+    if name_token:
+        df_filtered = df_filtered[
+            df_filtered["Nombre"].fillna("").map(normalize_search_text).str.contains(name_token)
+        ]
+
+if selected_activities:
+    df_filtered = df_filtered[df_filtered["Activity"].isin(selected_activities)]
+
+filters_applied = bool(name_query or selected_activities)
 
 
 # === INCRUSTACIÓN DEL SVG INTERACTIVO ===
@@ -219,7 +274,7 @@ if clicked_area_key:
     )
 
     # 2. Filtrar DataFrame
-    df_filtrado = df[df["_LOCATION_KEY_"] == clicked_area_key]
+    df_filtrado = df_filtered[df_filtered["_LOCATION_KEY_"] == clicked_area_key]
 
     if not df_filtrado.empty:
         st.markdown("---")
@@ -227,30 +282,55 @@ if clicked_area_key:
 
         # Extraer la lista de nombres únicos
         nombres = df_filtrado['Nombre'].unique()
-        
+
         if len(nombres) > 0:
             st.info(f"Se encontraron **{len(nombres)}** entradas de personal.")
-            
+
             # Mostrar como una lista de viñetas
             st.markdown("##### Lista de Nombres:")
             for nombre in nombres:
                 st.markdown(f"- **{nombre}**")
-            
+
             # Mostrar toda la tabla filtrada en un expander
             with st.expander("Ver tabla completa de registros filtrados"):
-                # Columnas a mostrar
-                columnas_a_mostrar = ['Número', 'Nombre', 'Activity', location_col, 'Oracle Location']
-                
-                st.dataframe(
-                    df_filtrado[columnas_a_mostrar].rename(columns={location_col: "Ubicación Excel"}), 
-                    use_container_width=True
-                )
+                if display_columns:
+                    area_table = df_filtrado[display_columns].rename(columns={location_col: "Ubicación Excel"})
+                    st.dataframe(area_table, use_container_width=True)
+                else:
+                    st.info("No hay columnas configuradas para mostrar en la tabla detallada.")
 
         else:
             st.warning("El área está cliqueada, pero no se encontraron nombres asignados en el Excel para esa ubicación.")
-    
+
     else:
         st.warning(f"❌ No se encontraron datos en el Excel para el área **{area_label}**.")
+        if filters_applied:
+            st.info("Verifica los filtros aplicados en la barra lateral; podrían estar excluyendo registros de esta área.")
 
 else:
     st.info("Aún no has seleccionado un área (desde el SVG).")
+
+st.markdown("---")
+st.markdown("### 🔍 Explorador de registros filtrados")
+
+if filters_applied:
+    st.caption(f"Los filtros actuales devuelven {len(df_filtered)} registro(s) del Excel.")
+else:
+    st.caption("Muestra los datos completos del Excel. Usa los filtros de la barra lateral para acotar los resultados.")
+
+if df_filtered.empty:
+    st.warning("No se encontraron registros que coincidan con los filtros seleccionados.")
+else:
+    if display_columns:
+        filtered_table = df_filtered[display_columns].rename(columns={location_col: "Ubicación Excel"})
+        st.dataframe(filtered_table, use_container_width=True)
+
+        csv_data = filtered_table.to_csv(index=False).encode("utf-8-sig")
+        st.download_button(
+            "⬇️ Descargar resultados filtrados (CSV)",
+            data=csv_data,
+            file_name="inventario_filtrado.csv",
+            mime="text/csv",
+        )
+    else:
+        st.info("No hay columnas disponibles para mostrar o exportar desde el Excel.")
