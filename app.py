@@ -279,6 +279,12 @@ html = f"""
 components.html(html, height=700, scrolling=False)
 
 # --- VISUALIZACIÓN DE RESULTADOS ---
+if clicked_area_key:
+    cols_debug = [c for c in ["SVG_ID", "_SVG_ID_KEY_", "_LOCATION_KEY_", "_ORACLE_LOCATION_KEY_", location_col] if c in df_filtered.columns]
+    st.write("DEBUG columnas clave presentes:", cols_debug)
+
+    for c in cols_debug:
+        st.write(f"DEBUG primeros valores de {c}:", df_filtered[c].dropna().astype(str).head(10).tolist())
 
 if clicked_area_key:
     # 1. Obtener la etiqueta amigable del SVG
@@ -310,9 +316,15 @@ if clicked_area_key:
 
     if key_columns:
         mask = pd.Series(False, index=df_filtered.index)
+
         for col in key_columns:
-            mask = mask | (df_filtered[col] == clicked_area_key)
+            col_mask = (df_filtered[col] == clicked_area_key)
+            st.write(f"DEBUG matches en {col} para '{clicked_area_key}':", int(col_mask.sum()))
+            mask = mask | col_mask
+
+        st.write("DEBUG matches totales combinados:", int(mask.sum()))
         df_filtrado = df_filtered[mask]
+
     else:
         df_filtrado = df_filtered[df_filtered["_LOCATION_KEY_"] == clicked_area_key]
 
