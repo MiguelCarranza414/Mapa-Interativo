@@ -205,20 +205,4 @@ if clicked_area_raw:
 else:
     st.info("Aún no has seleccionado un área (desde el SVG).")
 
-# === Resultado del clic ===
-if clicked_area_raw:
-    st.success(f"Área seleccionada: **{clicked_area_raw}**")
-    filt = df[df["_LOCATION_KEY_"] == clicked_area_key]
-    if filt.empty:
-        st.info("No hay coincidencias para esa área en tu Excel.")
-    else:
-        st.dataframe(filt.drop(columns=["_LOCATION_KEY_"]), use_container_width=True)
-        csv = filt.drop(columns=["_LOCATION_KEY_"]).to_csv(index=False).encode("utf-8")
-        st.download_button(
-            "⬇️ Descargar (CSV)",
-            csv,
-            file_name=f"inventario_{normalize_key(clicked_area_raw)}.csv",
-            mime="text/csv",
-        )
-else:
-    st.info("Aún no has seleccionado un área.")
+
