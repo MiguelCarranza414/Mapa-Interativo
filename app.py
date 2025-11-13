@@ -109,12 +109,23 @@ normalized_cols = {normalize_key(c): c for c in df.columns}
 target_key = "LOCATION"
 location_col = normalized_cols.get(target_key)
 
+svg_id_col = normalized_cols.get("SVG_ID")
+oracle_location_col = normalized_cols.get("ORACLE_LOCATION")
+
 if not location_col:
     st.error(f"❌ Tu Excel debe tener una columna de ubicación (ej. 'Location', 'Locación'). No se encontró la columna con la clave '{target_key}'.")
     st.stop()
 
 # 4. Creación de la Clave de Unión
 df["_LOCATION_KEY_"] = df[location_col].map(normalize_key)
+
+if svg_id_col:
+    df["_SVG_ID_KEY_"] = df[svg_id_col].map(normalize_key)
+else:
+    df["_SVG_ID_KEY_"] = df["_LOCATION_KEY_"]
+
+if oracle_location_col:
+    df["_ORACLE_LOCATION_KEY_"] = df[oracle_location_col].map(normalize_key)
 
 display_columns = build_display_columns(df, location_col)
 
@@ -274,9 +285,24 @@ if clicked_area_key:
     )
 
     # 2. Filtrar DataFrame
-    df_filtrado = df_filtered[df_filtered["_LOCATION_KEY_"] == clicked_area_key]
+    # Priorizar coincidencias en las distintas columnas relacionadas con el área
+    key_columns = [col for col in ["_SVG_ID_KEY_", "_LOCATION_KEY_", "_ORACLE_LOCATION_KEY_"] if col in df_filtered.columns]
+
+    if key_columns:
+        mask = pd.Series(False, index=df_filtered.index)
+        for col in key_columns:
+            mask = mask | (df_filtered[col] == clicked_area_key)
+        df_filtrado = df_filtered[mask]
+    else:
+        df_filtrado = df_filtered[df_filtered["_LOCATION_KEY_"] == clicked_area_key]
 
     if not df_filtrado.empty:
+        # Si hay registros, toma la etiqueta desde el Excel como nombre legible
+        if location_col in df_filtrado.columns:
+            excel_label = df_filtrado[location_col].dropna().astype(str)
+            if not excel_label.empty:
+                area_label = excel_label.iloc[0]
+
         st.markdown("---")
         st.subheader(f"👥 Personal Asignado a: **{area_label}**")
 
