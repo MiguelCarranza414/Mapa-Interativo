@@ -222,43 +222,91 @@ if clicked_area_key:
         df_filtrado = df_filtered[df_filtered["_LOCATION_KEY_"] == clicked_area_key]
 
     if not df_filtrado.empty:
+        # Si hay registros, toma la etiqueta desde el Excel como nombre legible
         if location_col in df_filtrado.columns:
             excel_label = df_filtrado[location_col].dropna().astype(str)
             if not excel_label.empty:
                 area_label = excel_label.iloc[0]
 
+        # --- NUEVO: detectar leaders y contadores en esta área ---
+        leaders_df = df_filtrado[df_filtrado["Activity"] == "Counting Leader"]
+        counters_df = df_filtrado[df_filtrado["Activity"] == "Counting"]
+
+        leaders = leaders_df["Nombre"].unique()
+        num_counters = int(counters_df["Nombre"].nunique()) if not counters_df.empty else 0
+
         st.markdown("---")
         st.subheader(f"👥 Personal Asignado a: **{area_label}**")
 
+        # Mostrar resumen de leaders si existen
+        if len(leaders) > 0:
+            # Chip resumen
+            st.markdown(
+                f"""
+                <div style="
+                  padding:8px 12px; border-radius:12px;
+                  background:#0f172a; color:#e5e7eb;
+                  border:1px solid #334155; margin:4px 0 8px 0;
+                  font-size:0.9rem;
+                ">
+                  <strong>Counting Leaders asignados:</strong> {", ".join(leaders)}
+                  {"&nbsp;·&nbsp;("+str(num_counters)+" contadores)" if num_counters else ""}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        else:
+            # Si no hay leaders, puedes dejarlo callado o mostrar un aviso suave
+            st.caption("No se encontraron registros con Activity = 'Counting Leader' para esta área.")
+
+        # --- Listado general de personas del área (como antes) ---
         nombres = df_filtrado["Nombre"].unique()
 
-        if len(nombres) > 0:
-            st.info(f"Se encontraron **{len(nombres)}** entradas de personal.")
+    # --- Listado general de personas del área, con Activity ---
+    if "Activity" in df_filtrado.columns:
+        # Agrupar por nombre y juntar las activities únicas de cada persona
+        personas = (
+            df_filtrado[["Nombre", "Activity"]]
+            .fillna({"Activity": ""})
+            .groupby("Nombre")["Activity"]
+            .unique()
+            .reset_index()
+        )
+        total_personas = len(personas)
+
+        if total_personas > 0:
+            st.info(f"Se encontraron **{total_personas}** entradas de personal en esta área.")
 
             st.markdown("##### Lista de Nombres:")
-            for nombre in nombres:
-                st.markdown(f"- **{nombre}**")
-
-            with st.expander("Ver tabla completa de registros filtrados"):
-                if display_columns:
-                    area_table = df_filtrado[display_columns].rename(
-                        columns={location_col: "Ubicación Excel"}
-                    )
-                    st.dataframe(area_table, width="stretch")
+            for _, row in personas.iterrows():
+                nombre = row["Nombre"]
+                acts = [a for a in row["Activity"] if a]  # quitar vacíos
+                if acts:
+                    # Si una persona tiene varias actividades, las juntamos con coma
+                    activity_label = ", ".join(sorted(set(acts)))
+                    st.markdown(f"- **{nombre}** — _{activity_label}_")
                 else:
-                    st.info("No hay columnas configuradas para mostrar en la tabla detallada.")
+                    st.markdown(f"- **{nombre}**")
         else:
             st.warning(
                 "El área está cliqueada, pero no se encontraron nombres asignados "
                 "en el Excel para esa ubicación."
             )
     else:
-        st.warning(f"❌ No se encontraron datos en el Excel para el área **{area_label}**.")
-        if filters_applied:
-            st.info(
-                "Verifica los filtros aplicados en la barra lateral; podrían estar "
-                "excluyendo registros de esta área."
+        # Fallback por si algún día no existiera la columna Activity
+        nombres = df_filtrado["Nombre"].unique()
+        if len(nombres) > 0:
+            st.info(f"Se encontraron **{len(nombres)}** entradas de personal en esta área.")
+            st.markdown("##### Lista de Nombres:")
+            for nombre in nombres:
+                st.markdown(f"- **{nombre}**")
+        else:
+            st.warning(
+                "El área está cliqueada, pero no se encontraron nombres asignados "
+                "en el Excel para esa ubicación."
             )
+
+
 else:
     st.info("Aún no has seleccionado un área (desde el SVG).")
 
