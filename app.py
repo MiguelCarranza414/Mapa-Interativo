@@ -196,87 +196,15 @@ filters_applied = bool(name_query or selected_activities)
 # === INCRUSTACIÓN DEL SVG INTERACTIVO ===
 
 # El bloque HTML/JS se mantiene igual ya que es robusto para el iframe de Streamlit.
-html = f"""
-<div id="svg-wrap" style="position:relative;">
-    {svg_content}
-    <div id="last-click" style="
-        position:absolute; right:8px; bottom:8px;
-        background:#111827; color:#fff; border:1px solid #374151;
-        padding:6px 10px; border-radius:999px; font-size:12px; display:none;">
+st.markdown(
+    f"""
+    <div id="svg-wrap" style="position:relative;">
+        {svg_content}
     </div>
-</div>
+    """,
+    unsafe_allow_html=True
+)
 
-<script>
-(function() {{
-    function ready(fn) {{
-        if (document.readyState !== 'loading') fn();
-        else document.addEventListener('DOMContentLoaded', fn);
-    }}
-
-    function setTopLocation(url) {{
-        try {{
-            // Intento 1: navegar el padre directamente
-            window.parent.location.href = url;
-            return true;
-        }} catch (e) {{}}
-        try {{
-            // Intento 2: usar un <a target="_top">
-            const a = document.createElement('a');
-            a.href = url;
-            a.target = '_top';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            return true;
-        }} catch (e) {{}}
-        return false;
-    }}
-
-    function markClickable(el) {{
-        try {{ el.style.cursor = 'pointer'; }} catch (e) {{}}
-        el.addEventListener('click', function(ev) {{
-            ev.stopPropagation();
-            const key = el.getAttribute('data-area') || el.id || '';
-            if (!key) return;
-
-            // Muestra feedback local inmediato dentro del iframe (debug)
-            const chip = document.getElementById('last-click');
-            if (chip) {{
-                chip.textContent = 'Click: ' + key;
-                chip.style.display = 'inline-block';
-            }}
-
-            // Actualiza ?area= en la URL del documento padre
-            const topUrl = new URL(window.parent.location.href);
-            topUrl.searchParams.set('area', key);
-            const ok = setTopLocation(topUrl.toString());
-            if (!ok) {{
-                console.log('No se pudo navegar el documento padre.');
-            }}
-        }});
-    }}
-
-    function init() {{
-        const svg = document.querySelector('#svg-wrap svg');
-        if (!svg) {{ setTimeout(init, 60); return; }}
-
-        let clickable = svg.querySelectorAll('[data-area], .area');
-        if (!clickable || clickable.length === 0) {{
-            // Modo compatibilidad: prueba con cualquier [id] visible que no sea el fondo
-            clickable = Array.from(svg.querySelectorAll('[id]'))
-                .filter(el => el.tagName.toLowerCase() !== 'svg')
-                .filter(el => !(el.getAttribute('class')||'').includes('bg'))
-                .filter(el => (el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0));
-        }}
-        clickable.forEach(markClickable);
-    }}
-
-    ready(init);
-}})();
-</script>
-"""
-
-components.html(html, height=700, scrolling=False)
 
 # --- VISUALIZACIÓN DE RESULTADOS ---
 if clicked_area_key:

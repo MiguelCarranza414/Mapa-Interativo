@@ -267,9 +267,11 @@
   </g>
 
   <!-- Coils_Shop -->
-  <g class="area" data-area="Coils_Shop">
-    <title>Coils Shop</title>
-    <path class="stroke" d="M1247.5 319.587L1242.12 337.5H1023.5V283.5H1247.5V319.587Z"/>
-  </g>
+  <a href="?area=Coils_Shop">
+    <g class="area" data-area="Coils_Shop">
+      <title>Coils Shop</title>
+      <path class="stroke" d="M1247.5 319.587L1242.12 337.5H1023.5V283.5H1247.5V319.587Z"/>
+    </g>
+  </a>
 
 </svg>
