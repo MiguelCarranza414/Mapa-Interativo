@@ -2,12 +2,9 @@ import unicodedata
 from pathlib import Path
 import pandas as pd
 import streamlit as st
-import streamlit.components.v1 as components
-import xml.etree.ElementTree as ET # Mover import al inicio
+import xml.etree.ElementTree as ET
 
 # === CONFIGURACIÓN ===
-# Preferible usar Path para todas las rutas.
-# ¡IMPORTANTE! Reemplaza esto con tu ruta local si es necesario.
 EXCEL_PATH = Path(r"C:\Inventario\data\roles_areas.xlsx")
 SVG_PATH   = Path("data/mapa.svg")
 
@@ -20,7 +17,6 @@ st.subheader("Mapa de áreas interactivas")
 @st.cache_data(show_spinner=False)
 def load_excel(path: Path) -> pd.DataFrame:
     """Carga el DataFrame desde el archivo Excel."""
-    # Usamos Path directamente
     return pd.read_excel(path)
 
 @st.cache_data(show_spinner=False)
@@ -37,19 +33,14 @@ def normalize_key(s: str) -> str:
     """Estandariza una cadena a MAYÚSCULAS sin acentos, con espacios a guiones bajos."""
     if not s:
         return ""
-
-    # 1. Normalización a NFKD (separa base de acentos)
     s = unicodedata.normalize("NFKD", str(s).strip())
-    # 2. Quitar caracteres combinantes (acentos)
     s = "".join(ch for ch in s if not unicodedata.combining(ch))
-    # 3. Reemplazar espacios y poner en mayúsculas
     return s.replace(" ", "_").upper()
 
 def normalize_search_text(value: str) -> str:
     """Normaliza texto para búsqueda flexible (sin acentos y en minúsculas)."""
     if not value:
         return ""
-
     normalized = unicodedata.normalize("NFKD", str(value).strip())
     normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
     return normalized.casefold()
@@ -59,27 +50,26 @@ def get_svg_title(svg_text: str, area_key: str) -> str:
     if not svg_text or not area_key:
         return area_key or ""
     try:
-        # Optimización: el namespace SVG no es siempre necesario si se usa el iterador
         root = ET.fromstring(svg_text)
 
-        # Usar XPath simplifica la búsqueda
-        # Busca cualquier elemento con el atributo data-area="[clave]"
+        # Busca por data-area
         for el in root.findall(f'.//*[@data-area="{area_key}"]'):
-            # Busca un hijo <title> dentro del elemento encontrado
-            title_el = el.find('.//{http://www.w3.org/2000/svg}title') or el.find('title')
+            title_el = el.find('.//{http://www.w3.org/2000/svg}title')
+            if title_el is None:
+                title_el = el.find('title')
             if title_el is not None and (title_el.text or "").strip():
                 return title_el.text.strip()
-        
-        # Si el área no tiene data-area, se intenta buscar por id (aunque esto no se usa en el flujo principal)
-        # Opcional: si el SVG usa IDs en lugar de data-area (modo compatibilidad)
+
+        # Fallback: buscar por id
         el_by_id = root.find(f'.//*[@id="{area_key}"]')
         if el_by_id is not None:
-             title_el = el_by_id.find('.//{http://www.w3.org/2000/svg}title') or el_by_id.find('title')
-             if title_el is not None and (title_el.text or "").strip():
+            title_el = el_by_id.find('.//{http://www.w3.org/2000/svg}title')
+            if title_el is None:
+                title_el = el_by_id.find('title')
+            if title_el is not None and (title_el.text or "").strip():
                 return title_el.text.strip()
 
     except Exception:
-        # En caso de error de parseo XML/SVG
         pass
     return area_key
 
@@ -103,8 +93,7 @@ if not SVG_PATH.exists():
 
 svg_content = load_svg(SVG_PATH)
 
-# 3. Detección de Columna 'Location' (Optimizado)
-# Usamos map + normalize_key para encontrar la columna correcta de forma más eficiente.
+# 3. Detección de Columna 'Location'
 normalized_cols = {normalize_key(c): c for c in df.columns}
 target_key = "LOCATION"
 location_col = normalized_cols.get(target_key)
@@ -113,7 +102,10 @@ svg_id_col = normalized_cols.get("SVG_ID")
 oracle_location_col = normalized_cols.get("ORACLE_LOCATION")
 
 if not location_col:
-    st.error(f"❌ Tu Excel debe tener una columna de ubicación (ej. 'Location', 'Locación'). No se encontró la columna con la clave '{target_key}'.")
+    st.error(
+        f"❌ Tu Excel debe tener una columna de ubicación (ej. 'Location', 'Locación'). "
+        f"No se encontró la columna con la clave '{target_key}'."
+    )
     st.stop()
 
 # 4. Creación de la Clave de Unión
@@ -129,30 +121,24 @@ if oracle_location_col:
 
 display_columns = build_display_columns(df, location_col)
 
-# 5. Leer ?area= (Usando st.query_params, más moderno que st.experimental_get_query_params)
+# 5. Leer ?area= desde la URL
 def get_clicked_area_key():
     """Lee y normaliza el parámetro 'area' de la URL."""
     qp = st.query_params
-
     area_raw = None
 
     if "area" in qp:
         value = qp["area"]
-        # Streamlit nuevo: string
         if isinstance(value, str):
             area_raw = value
-        # Por compatibilidad: lista (versiones anteriores o casos raros)
         elif isinstance(value, list) and value:
             area_raw = value[0]
 
     return area_raw, normalize_key(area_raw) if area_raw else None
 
-
 clicked_area_raw, clicked_area_key = get_clicked_area_key()
-st.write("DEBUG query_params:", st.query_params)
-st.write("DEBUG area_raw:", clicked_area_raw)
-st.write("DEBUG area_key:", clicked_area_key)
 
+# === INTERFAZ DE USUARIO ===
 st.markdown("### 📊 Resumen rápido del inventario")
 col_total, col_names, col_locations = st.columns(3)
 with col_total:
@@ -192,10 +178,7 @@ if selected_activities:
 
 filters_applied = bool(name_query or selected_activities)
 
-
 # === INCRUSTACIÓN DEL SVG INTERACTIVO ===
-
-# El bloque HTML/JS se mantiene igual ya que es robusto para el iframe de Streamlit.
 st.markdown(
     f"""
     <div id="svg-wrap" style="position:relative;">
@@ -205,15 +188,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 # --- VISUALIZACIÓN DE RESULTADOS ---
-if clicked_area_key:
-    cols_debug = [c for c in ["SVG_ID", "_SVG_ID_KEY_", "_LOCATION_KEY_", "_ORACLE_LOCATION_KEY_", location_col] if c in df_filtered.columns]
-    st.write("DEBUG columnas clave presentes:", cols_debug)
-
-    for c in cols_debug:
-        st.write(f"DEBUG primeros valores de {c}:", df_filtered[c].dropna().astype(str).head(10).tolist())
-
 if clicked_area_key:
     # 1. Obtener la etiqueta amigable del SVG
     area_label = get_svg_title(svg_content, clicked_area_raw) or clicked_area_raw
@@ -233,31 +208,20 @@ if clicked_area_key:
     )
 
     # 2. Filtrar DataFrame
-    # Priorizar coincidencias en las distintas columnas relacionadas con el área
-    st.write(
-    df_filtered[
-        [c for c in ["SVG_ID", "_SVG_ID_KEY_", "_LOCATION_KEY_", location_col] if c in df_filtered.columns]
-    ].head(20)
-)
-
-    key_columns = [col for col in ["_SVG_ID_KEY_", "_LOCATION_KEY_", "_ORACLE_LOCATION_KEY_"] if col in df_filtered.columns]
+    key_columns = [
+        col for col in ["_SVG_ID_KEY_", "_LOCATION_KEY_", "_ORACLE_LOCATION_KEY_"]
+        if col in df_filtered.columns
+    ]
 
     if key_columns:
         mask = pd.Series(False, index=df_filtered.index)
-
         for col in key_columns:
-            col_mask = (df_filtered[col] == clicked_area_key)
-            st.write(f"DEBUG matches en {col} para '{clicked_area_key}':", int(col_mask.sum()))
-            mask = mask | col_mask
-
-        st.write("DEBUG matches totales combinados:", int(mask.sum()))
+            mask = mask | (df_filtered[col] == clicked_area_key)
         df_filtrado = df_filtered[mask]
-
     else:
         df_filtrado = df_filtered[df_filtered["_LOCATION_KEY_"] == clicked_area_key]
 
     if not df_filtrado.empty:
-        # Si hay registros, toma la etiqueta desde el Excel como nombre legible
         if location_col in df_filtrado.columns:
             excel_label = df_filtrado[location_col].dropna().astype(str)
             if not excel_label.empty:
@@ -266,33 +230,35 @@ if clicked_area_key:
         st.markdown("---")
         st.subheader(f"👥 Personal Asignado a: **{area_label}**")
 
-        # Extraer la lista de nombres únicos
-        nombres = df_filtrado['Nombre'].unique()
+        nombres = df_filtrado["Nombre"].unique()
 
         if len(nombres) > 0:
             st.info(f"Se encontraron **{len(nombres)}** entradas de personal.")
 
-            # Mostrar como una lista de viñetas
             st.markdown("##### Lista de Nombres:")
             for nombre in nombres:
                 st.markdown(f"- **{nombre}**")
 
-            # Mostrar toda la tabla filtrada en un expander
             with st.expander("Ver tabla completa de registros filtrados"):
                 if display_columns:
-                    area_table = df_filtrado[display_columns].rename(columns={location_col: "Ubicación Excel"})
+                    area_table = df_filtrado[display_columns].rename(
+                        columns={location_col: "Ubicación Excel"}
+                    )
                     st.dataframe(area_table, width="stretch")
                 else:
                     st.info("No hay columnas configuradas para mostrar en la tabla detallada.")
-
         else:
-            st.warning("El área está cliqueada, pero no se encontraron nombres asignados en el Excel para esa ubicación.")
-
+            st.warning(
+                "El área está cliqueada, pero no se encontraron nombres asignados "
+                "en el Excel para esa ubicación."
+            )
     else:
         st.warning(f"❌ No se encontraron datos en el Excel para el área **{area_label}**.")
         if filters_applied:
-            st.info("Verifica los filtros aplicados en la barra lateral; podrían estar excluyendo registros de esta área.")
-
+            st.info(
+                "Verifica los filtros aplicados en la barra lateral; podrían estar "
+                "excluyendo registros de esta área."
+            )
 else:
     st.info("Aún no has seleccionado un área (desde el SVG).")
 
@@ -308,7 +274,9 @@ if df_filtered.empty:
     st.warning("No se encontraron registros que coincidan con los filtros seleccionados.")
 else:
     if display_columns:
-        filtered_table = df_filtered[display_columns].rename(columns={location_col: "Ubicación Excel"})
+        filtered_table = df_filtered[display_columns].rename(
+            columns={location_col: "Ubicación Excel"}
+        )
         st.dataframe(filtered_table, width="stretch")
 
         csv_data = filtered_table.to_csv(index=False).encode("utf-8-sig")
