@@ -19,25 +19,25 @@ custom_css = """
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --navy-900: #0b1a2a;
-  --navy-800: #10223a;
-  --navy-700: #1b2f4d;
-  --graphite-900: #0d1117;
-  --graphite-800: #1a1f29;
-  --graphite-700: #242b38;
-  --accent: #3b82f6;
-  --muted: #9ca3af;
-  --surface: #111827;
-  --border: #1f2937;
-  --shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  --navy-900: #ecf3ff;
+  --navy-800: #e2edff;
+  --navy-700: #d2e3ff;
+  --graphite-900: #f7f9fc;
+  --graphite-800: #f1f4fa;
+  --graphite-700: #e6ebf5;
+  --accent: #2563eb;
+  --muted: #6b7280;
+  --surface: #ffffff;
+  --border: #d7deea;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
 }
 
 html, body, [class*="css"], [data-testid="stAppViewContainer"] {
   font-family: 'Inter', sans-serif;
-  background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.06), transparent 25%),
-              radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.04), transparent 20%),
+  background: radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.08), transparent 26%),
+              radial-gradient(circle at 80% 0%, rgba(37, 99, 235, 0.06), transparent 22%),
               var(--graphite-900);
-  color: #e5e7eb;
+  color: #111827;
 }
 
 [data-testid="stAppViewContainer"] > .main {
@@ -47,7 +47,7 @@ html, body, [class*="css"], [data-testid="stAppViewContainer"] {
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: #f3f4f6;
+  color: #0f172a;
 }
 
 /* Containers */
@@ -57,47 +57,47 @@ h1, h2, h3, h4, h5, h6 {
 
 [data-testid="stMarkdownContainer"] > p,
 [data-testid="stMarkdownContainer"] > div {
-  background: linear-gradient(180deg, rgba(26, 32, 44, 0.85), rgba(17, 24, 39, 0.85));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 250, 255, 0.96));
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   border-radius: 16px;
   padding: 1rem 1.25rem;
-  color: #e5e7eb;
+  color: #0f172a;
 }
 
 /* Metric cards */
 [data-testid="metric-container"] {
-  background: linear-gradient(145deg, var(--graphite-800), var(--graphite-700));
+  background: linear-gradient(145deg, var(--surface), var(--graphite-800));
   border-radius: 18px;
   padding: 1rem 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 [data-testid="metric-container"] .stMetric-label {
-  color: var(--muted);
+  color: #475569;
   font-weight: 600;
   letter-spacing: 0.01em;
 }
 [data-testid="metric-container"] .stMetric-value {
-  color: #f8fafc;
+  color: #0b1b35;
   font-weight: 700;
 }
 
 /* Sidebar */
 [data-testid="stSidebar"] {
-  background: linear-gradient(180deg, var(--navy-900), var(--graphite-800));
+  background: linear-gradient(180deg, var(--navy-900), #f8fbff);
   border-right: 1px solid var(--border);
-  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.02);
+  box-shadow: inset -1px 0 0 rgba(15, 23, 42, 0.04);
 }
 [data-testid="stSidebar"] * {
-  color: #e5e7eb !important;
+  color: #0f172a !important;
 }
 [data-testid="stSidebar"] .stTextInput input,
 [data-testid="stSidebar"] .stMultiSelect [data-baseweb="input"] {
-  background: var(--graphite-700);
+  background: var(--surface);
   border-radius: 12px;
   border: 1px solid var(--border);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 1px 0 rgba(15, 23, 42, 0.03);
 }
 
 /* Buttons */
@@ -126,7 +126,7 @@ button[kind="primary"]:active {
 /* Tables */
 div[data-testid="stDataFrame"],
 div[data-testid="stTable"] {
-  background: var(--graphite-800);
+  background: var(--surface);
   border-radius: 14px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
@@ -134,27 +134,27 @@ div[data-testid="stTable"] {
 }
 div[data-testid="stDataFrame"] table,
 div[data-testid="stTable"] table {
-  color: #e5e7eb;
+  color: #0f172a;
 }
 div[data-testid="stDataFrame"] tbody tr:hover,
 div[data-testid="stTable"] tbody tr:hover {
-  background: rgba(59, 130, 246, 0.06);
+  background: rgba(37, 99, 235, 0.08);
 }
 
 /* Tooltips */
 [data-baseweb="tooltip"] {
-  background: var(--graphite-700) !important;
-  color: #f9fafb !important;
+  background: var(--surface) !important;
+  color: #0f172a !important;
   border: 1px solid var(--border) !important;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.15) !important;
   border-radius: 10px !important;
   font-weight: 600;
 }
 
 /* SVG container */
 #svg-wrap {
-  background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(17, 24, 39, 0.95));
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: linear-gradient(145deg, rgba(232, 240, 255, 0.95), rgba(255, 255, 255, 0.96));
+  border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 18px;
   padding: 1.25rem;
   box-shadow: var(--shadow);
@@ -167,13 +167,13 @@ div[data-testid="stTable"] tbody tr:hover {
 /* Chips & inline pills */
 .stAlert, .stInfo, .stSuccess, .stWarning {
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow: var(--shadow);
 }
 
 /* Links & captions */
 a, .stCaption, .stMarkdown p {
-  color: #cbd5f5;
+  color: #1d4ed8;
 }
 
 </style>
@@ -409,8 +409,8 @@ if clicked_area_key:
         f"""
         <div style="
           display:inline-block; padding:8px 12px; border-radius:999px;
-          background:#1f2937; color:white; font-weight:600;
-          border:1px solid #4b5563; margin:6px 0;
+          background:#eef2ff; color:#0f172a; font-weight:600;
+          border:1px solid #c7d2fe; margin:6px 0;
         ">
           Área clickeada (SVG): {area_label}
         </div>
@@ -456,8 +456,8 @@ if clicked_area_key:
                 f"""
                 <div style="
                   padding:8px 12px; border-radius:12px;
-                  background:#0f172a; color:#e5e7eb;
-                  border:1px solid #334155; margin:4px 0 8px 0;
+                  background:#eef2ff; color:#0f172a;
+                  border:1px solid #cbd5f5; margin:4px 0 8px 0;
                   font-size:0.9rem;
                 ">
                   <strong>Counting Leaders asignados:</strong> {", ".join(leaders)}
