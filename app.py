@@ -12,6 +12,175 @@ st.set_page_config(layout="wide")
 st.title("📦 Inventario Anual 2025")
 st.subheader("Mapa de áreas interactivas")
 
+
+# === ESTILOS PERSONALIZADOS ===
+custom_css = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --navy-900: #0b1a2a;
+  --navy-800: #10223a;
+  --navy-700: #1b2f4d;
+  --graphite-900: #0d1117;
+  --graphite-800: #1a1f29;
+  --graphite-700: #242b38;
+  --accent: #3b82f6;
+  --muted: #9ca3af;
+  --surface: #111827;
+  --border: #1f2937;
+  --shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+html, body, [class*="css"], [data-testid="stAppViewContainer"] {
+  font-family: 'Inter', sans-serif;
+  background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.06), transparent 25%),
+              radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.04), transparent 20%),
+              var(--graphite-900);
+  color: #e5e7eb;
+}
+
+[data-testid="stAppViewContainer"] > .main {
+  padding-top: 1.5rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #f3f4f6;
+}
+
+/* Containers */
+.block-container {
+  padding: 1.5rem 2rem 2rem 2rem;
+}
+
+[data-testid="stMarkdownContainer"] > p,
+[data-testid="stMarkdownContainer"] > div {
+  background: linear-gradient(180deg, rgba(26, 32, 44, 0.85), rgba(17, 24, 39, 0.85));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  color: #e5e7eb;
+}
+
+/* Metric cards */
+[data-testid="metric-container"] {
+  background: linear-gradient(145deg, var(--graphite-800), var(--graphite-700));
+  border-radius: 18px;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+[data-testid="metric-container"] .stMetric-label {
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+[data-testid="metric-container"] .stMetric-value {
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, var(--navy-900), var(--graphite-800));
+  border-right: 1px solid var(--border);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.02);
+}
+[data-testid="stSidebar"] * {
+  color: #e5e7eb !important;
+}
+[data-testid="stSidebar"] .stTextInput input,
+[data-testid="stSidebar"] .stMultiSelect [data-baseweb="input"] {
+  background: var(--graphite-700);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* Buttons */
+.stButton > button,
+button[kind="primary"] {
+  background: linear-gradient(135deg, var(--accent), #1d4ed8);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 0.65rem 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 12px 25px rgba(59, 130, 246, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stButton > button:hover,
+button[kind="primary"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(59, 130, 246, 0.45);
+}
+.stButton > button:active,
+button[kind="primary"]:active {
+  transform: translateY(0);
+}
+
+/* Tables */
+div[data-testid="stDataFrame"],
+div[data-testid="stTable"] {
+  background: var(--graphite-800);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+div[data-testid="stDataFrame"] table,
+div[data-testid="stTable"] table {
+  color: #e5e7eb;
+}
+div[data-testid="stDataFrame"] tbody tr:hover,
+div[data-testid="stTable"] tbody tr:hover {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+/* Tooltips */
+[data-baseweb="tooltip"] {
+  background: var(--graphite-700) !important;
+  color: #f9fafb !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35) !important;
+  border-radius: 10px !important;
+  font-weight: 600;
+}
+
+/* SVG container */
+#svg-wrap {
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(17, 24, 39, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+#svg-wrap svg {
+  width: 100%;
+  height: auto;
+}
+
+/* Chips & inline pills */
+.stAlert, .stInfo, .stSuccess, .stWarning {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow);
+}
+
+/* Links & captions */
+a, .stCaption, .stMarkdown p {
+  color: #cbd5f5;
+}
+
+</style>
+"""
+
+st.markdown(custom_css, unsafe_allow_html=True)
+
 # --- FUNCIONES DE AYUDA ---
 
 @st.cache_data(show_spinner=False)
