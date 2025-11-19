@@ -1,23 +1,52 @@
+"""Aplicación Streamlit para explorar el inventario anual."""
+
+from __future__ import annotations
+
+import io
 import unicodedata
+from datetime import datetime
 from pathlib import Path
+
 import pandas as pd
 import streamlit as st
 import xml.etree.ElementTree as ET
 
 # === CONFIGURACIÓN ===
-EXCEL_PATH = Path(r"C:\Inventario\data\roles_areas.xlsx")
-SVG_PATH   = Path("data/mapa.svg")
+DEFAULT_EXCEL_PATH = Path(r"C:\Inventario\data\roles_areas.xlsx")
+SVG_PATH = Path("data/mapa.svg")
+EXPECTED_COLUMNS = {"Número", "Nombre"}
 
 st.set_page_config(layout="wide")
 st.title("📦 Inventario Anual 2025")
 st.subheader("Mapa de áreas interactivas")
 
+with st.sidebar:
+    st.header("⚙️ Fuente de datos")
+    st.caption("Carga un Excel personalizado o utiliza la ruta predeterminada del sistema.")
+    uploaded_excel = st.file_uploader("Subir archivo Excel", type=["xlsx", "xlsm", "xls"])
+
+    if DEFAULT_EXCEL_PATH.exists():
+        timestamp = datetime.fromtimestamp(DEFAULT_EXCEL_PATH.stat().st_mtime)
+        st.caption(
+            f"Predeterminado: `{DEFAULT_EXCEL_PATH}` (última modificación: {timestamp:%d/%m/%Y %H:%M})"
+        )
+    else:
+        st.caption(
+            "Ruta predeterminada no encontrada. Sube un archivo para comenzar."
+        )
+
 # --- FUNCIONES DE AYUDA ---
 
 @st.cache_data(show_spinner=False)
-def load_excel(path: Path) -> pd.DataFrame:
-    """Carga el DataFrame desde el archivo Excel."""
+def load_excel_from_path(path: Path) -> pd.DataFrame:
+    """Carga el DataFrame desde un archivo Excel en disco."""
     return pd.read_excel(path)
+
+
+@st.cache_data(show_spinner=False)
+def load_excel_from_bytes(content: bytes) -> pd.DataFrame:
+    """Carga el DataFrame a partir del contenido de un Excel cargado por el usuario."""
+    return pd.read_excel(io.BytesIO(content))
 
 @st.cache_data(show_spinner=False)
 def load_svg(path: Path) -> str:
@@ -44,6 +73,14 @@ def normalize_search_text(value: str) -> str:
     normalized = unicodedata.normalize("NFKD", str(value).strip())
     normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
     return normalized.casefold()
+
+
+def summarize_dataframe(df: pd.DataFrame) -> tuple[list[str], list[str]]:
+    """Devuelve columnas faltantes y opcionales para informar al usuario."""
+    available = set(df.columns)
+    missing_required = sorted(EXPECTED_COLUMNS - available)
+    optional = sorted(col for col in ("Activity", "Oracle Location", "SVG_ID") if col in available)
+    return missing_required, optional
 
 def get_svg_title(svg_text: str, area_key: str) -> str:
     """Busca el título amigable (<title>) dentro de un elemento del SVG."""
@@ -76,15 +113,44 @@ def get_svg_title(svg_text: str, area_key: str) -> str:
 
 # --- CARGA Y PREPARACIÓN DE DATOS ---
 
-# 1. Carga Segura de Excel
+# 1. Carga Segura de Excel (desde subida o ruta local)
+excel_source_label = ""
 try:
-    df = load_excel(EXCEL_PATH)
+    if uploaded_excel is not None:
+        excel_bytes = uploaded_excel.getvalue()
+        df = load_excel_from_bytes(excel_bytes)
+        excel_source_label = uploaded_excel.name or "Archivo cargado"
+    else:
+        df = load_excel_from_path(DEFAULT_EXCEL_PATH)
+        excel_source_label = DEFAULT_EXCEL_PATH.name
 except FileNotFoundError:
-    st.error(f"❌ Archivo Excel no encontrado en {EXCEL_PATH.resolve()}")
+    st.error(
+        "❌ No se encontró el Excel. Verifica la ruta predeterminada o sube un archivo manualmente."
+    )
     st.stop()
 except Exception as e:
     st.error(f"❌ No pude cargar el Excel: {e}")
     st.stop()
+
+missing_required, optional_columns = summarize_dataframe(df)
+if missing_required:
+    st.warning(
+        "Faltan columnas obligatorias en el Excel: " + ", ".join(missing_required)
+    )
+    st.stop()
+else:
+    st.caption(f"Fuente de datos: **{excel_source_label}** ({len(df)} registros).")
+    if optional_columns:
+        st.caption(
+            "Columnas disponibles para análisis adicional: " + ", ".join(optional_columns)
+        )
+
+with st.expander("📁 Información del Excel cargado", expanded=False):
+    st.write("Columnas detectadas:", ", ".join(sorted(df.columns)))
+    st.write(
+        "Primeras filas de referencia:",
+    )
+    st.dataframe(df.head(5))
 
 # 2. Carga Segura de SVG
 if not SVG_PATH.exists():
@@ -152,7 +218,7 @@ st.caption("Estos totales se calculan directamente desde el archivo Excel cargad
 with st.sidebar:
     st.header("🔎 Filtros rápidos")
     st.caption("Aplica filtros para explorar el personal sin necesidad de hacer clic en el mapa.")
-    name_query = st.text_input("Buscar por Número")
+    search_query = st.text_input("Buscar por número o nombre")
 
     activity_options = []
     if "Activity" in df.columns:
@@ -166,17 +232,28 @@ with st.sidebar:
 
 df_filtered = df.copy()
 
-if name_query:
-    num_token = normalize_search_text(name_query)
-    if num_token:
-        df_filtered = df_filtered[
-            df_filtered["Número"].astype(str).fillna("").map(normalize_search_text).str.contains(num_token)
-        ]
+if search_query:
+    token = normalize_search_text(search_query)
+    if token:
+        masks = []
+        if "Número" in df_filtered.columns:
+            masks.append(
+                df_filtered["Número"].astype(str).fillna("").map(normalize_search_text).str.contains(token)
+            )
+        if "Nombre" in df_filtered.columns:
+            masks.append(
+                df_filtered["Nombre"].astype(str).fillna("").map(normalize_search_text).str.contains(token)
+            )
+        if masks:
+            combined_mask = masks[0]
+            for extra_mask in masks[1:]:
+                combined_mask = combined_mask | extra_mask
+            df_filtered = df_filtered[combined_mask]
 
 if selected_activities:
     df_filtered = df_filtered[df_filtered["Activity"].isin(selected_activities)]
 
-filters_applied = bool(name_query or selected_activities)
+filters_applied = bool(search_query or selected_activities)
 
 # === INCRUSTACIÓN DEL SVG INTERACTIVO ===
 
