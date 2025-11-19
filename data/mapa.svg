@@ -1,9 +1,13 @@
 <svg viewBox="0 0 1289 392" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
   <style>
-    .bg { fill:#0E1117; }
-    .stroke { fill:#0E1117; stroke:white; }
+    .bg { fill:#FFFFFF; }
+    .stroke { fill:#FFFFFF; stroke:black; }
     .area { cursor:pointer; }
     .area:hover .stroke { stroke-width:2.5; }
+    .area.selected .stroke { stroke-width:3; stroke:#FC9801; }
+    .area.dimmed .stroke { opacity:0.25; }
+    .area.active .stroke { opacity:1; }
+    .area.selected .stroke { stroke-width:3; stroke:#FC9801; opacity:1; }
   </style>
 
   <rect class="bg" x="0" y="0" width="1289" height="392"/>

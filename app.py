@@ -152,7 +152,7 @@ st.caption("Estos totales se calculan directamente desde el archivo Excel cargad
 with st.sidebar:
     st.header("🔎 Filtros rápidos")
     st.caption("Aplica filtros para explorar el personal sin necesidad de hacer clic en el mapa.")
-    name_query = st.text_input("Buscar por nombre")
+    name_query = st.text_input("Buscar por Número")
 
     activity_options = []
     if "Activity" in df.columns:
@@ -167,10 +167,10 @@ with st.sidebar:
 df_filtered = df.copy()
 
 if name_query:
-    name_token = normalize_search_text(name_query)
-    if name_token:
+    num_token = normalize_search_text(name_query)
+    if num_token:
         df_filtered = df_filtered[
-            df_filtered["Nombre"].fillna("").map(normalize_search_text).str.contains(name_token)
+            df_filtered["Número"].astype(str).fillna("").map(normalize_search_text).str.contains(num_token)
         ]
 
 if selected_activities:
@@ -179,14 +179,56 @@ if selected_activities:
 filters_applied = bool(name_query or selected_activities)
 
 # === INCRUSTACIÓN DEL SVG INTERACTIVO ===
+
+highlighted_svg = svg_content
+
+# 1) Por defecto, todas las áreas quedan como "dimmed"
+highlighted_svg = highlighted_svg.replace('class="area"', 'class="area dimmed"')
+
+# 2) Determinar qué áreas tienen registros según los filtros actuales (df_filtered)
+active_ids = set()
+
+if svg_id_col and svg_id_col in df_filtered.columns:
+    # Usamos SVG_ID como referencia principal
+    active_ids = set(
+        df_filtered[svg_id_col].dropna().astype(str).unique()
+    )
+elif location_col in df_filtered.columns:
+    # Fallback: usamos Location si no hay SVG_ID
+    active_ids = set(
+        df_filtered[location_col].dropna().astype(str).unique()
+    )
+
+# 3) Marcar esas áreas como "active" (quita dimmed)
+for area_id in active_ids:
+    highlighted_svg = highlighted_svg.replace(
+        f'class="area dimmed" data-area="{area_id}"',
+        f'class="area active" data-area="{area_id}"'
+    )
+
+# 4) Si hay un área clickeada, marcarla como "selected"
+if clicked_area_raw:
+    # Si estaba como active, pasa a selected
+    highlighted_svg = highlighted_svg.replace(
+        f'class="area active" data-area="{clicked_area_raw}"',
+        f'class="area selected" data-area="{clicked_area_raw}"'
+    )
+    # Por si alguna quedara aún dimmed (sin registros pero clickeada)
+    highlighted_svg = highlighted_svg.replace(
+        f'class="area dimmed" data-area="{clicked_area_raw}"',
+        f'class="area selected" data-area="{clicked_area_raw}"'
+    )
+
+# 5) Renderizar el SVG resultante
 st.markdown(
     f"""
     <div id="svg-wrap" style="position:relative;">
-        {svg_content}
+        {highlighted_svg}
     </div>
     """,
     unsafe_allow_html=True
 )
+
 
 # --- VISUALIZACIÓN DE RESULTADOS ---
 if clicked_area_key:
