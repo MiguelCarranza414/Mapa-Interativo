@@ -12,6 +12,175 @@ st.set_page_config(layout="wide")
 st.title("📦 Inventario Anual 2025")
 st.subheader("Mapa de áreas interactivas")
 
+
+# === ESTILOS PERSONALIZADOS ===
+custom_css = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --navy-900: #ecf3ff;
+  --navy-800: #e2edff;
+  --navy-700: #d2e3ff;
+  --graphite-900: #f7f9fc;
+  --graphite-800: #f1f4fa;
+  --graphite-700: #e6ebf5;
+  --accent: #2563eb;
+  --muted: #6b7280;
+  --surface: #ffffff;
+  --border: #d7deea;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+}
+
+html, body, [class*="css"], [data-testid="stAppViewContainer"] {
+  font-family: 'Inter', sans-serif;
+  background: radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.08), transparent 26%),
+              radial-gradient(circle at 80% 0%, rgba(37, 99, 235, 0.06), transparent 22%),
+              var(--graphite-900);
+  color: #111827;
+}
+
+[data-testid="stAppViewContainer"] > .main {
+  padding-top: 1.5rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #0f172a;
+}
+
+/* Containers */
+.block-container {
+  padding: 1.5rem 2rem 2rem 2rem;
+}
+
+[data-testid="stMarkdownContainer"] > p,
+[data-testid="stMarkdownContainer"] > div {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 250, 255, 0.96));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  color: #0f172a;
+}
+
+/* Metric cards */
+[data-testid="metric-container"] {
+  background: linear-gradient(145deg, var(--surface), var(--graphite-800));
+  border-radius: 18px;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+[data-testid="metric-container"] .stMetric-label {
+  color: #475569;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+[data-testid="metric-container"] .stMetric-value {
+  color: #0b1b35;
+  font-weight: 700;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, var(--navy-900), #f8fbff);
+  border-right: 1px solid var(--border);
+  box-shadow: inset -1px 0 0 rgba(15, 23, 42, 0.04);
+}
+[data-testid="stSidebar"] * {
+  color: #0f172a !important;
+}
+[data-testid="stSidebar"] .stTextInput input,
+[data-testid="stSidebar"] .stMultiSelect [data-baseweb="input"] {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(15, 23, 42, 0.03);
+}
+
+/* Buttons */
+.stButton > button,
+button[kind="primary"] {
+  background: linear-gradient(135deg, var(--accent), #1d4ed8);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 0.65rem 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 12px 25px rgba(59, 130, 246, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stButton > button:hover,
+button[kind="primary"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(59, 130, 246, 0.45);
+}
+.stButton > button:active,
+button[kind="primary"]:active {
+  transform: translateY(0);
+}
+
+/* Tables */
+div[data-testid="stDataFrame"],
+div[data-testid="stTable"] {
+  background: var(--surface);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+div[data-testid="stDataFrame"] table,
+div[data-testid="stTable"] table {
+  color: #0f172a;
+}
+div[data-testid="stDataFrame"] tbody tr:hover,
+div[data-testid="stTable"] tbody tr:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+/* Tooltips */
+[data-baseweb="tooltip"] {
+  background: var(--surface) !important;
+  color: #0f172a !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.15) !important;
+  border-radius: 10px !important;
+  font-weight: 600;
+}
+
+/* SVG container */
+#svg-wrap {
+  background: linear-gradient(145deg, rgba(232, 240, 255, 0.95), rgba(255, 255, 255, 0.96));
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+#svg-wrap svg {
+  width: 100%;
+  height: auto;
+}
+
+/* Chips & inline pills */
+.stAlert, .stInfo, .stSuccess, .stWarning {
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow);
+}
+
+/* Links & captions */
+a, .stCaption, .stMarkdown p {
+  color: #1d4ed8;
+}
+
+</style>
+"""
+
+st.markdown(custom_css, unsafe_allow_html=True)
+
 # --- FUNCIONES DE AYUDA ---
 
 @st.cache_data(show_spinner=False)
@@ -240,8 +409,8 @@ if clicked_area_key:
         f"""
         <div style="
           display:inline-block; padding:8px 12px; border-radius:999px;
-          background:#1f2937; color:white; font-weight:600;
-          border:1px solid #4b5563; margin:6px 0;
+          background:#eef2ff; color:#0f172a; font-weight:600;
+          border:1px solid #c7d2fe; margin:6px 0;
         ">
           Área clickeada (SVG): {area_label}
         </div>
@@ -287,8 +456,8 @@ if clicked_area_key:
                 f"""
                 <div style="
                   padding:8px 12px; border-radius:12px;
-                  background:#0f172a; color:#e5e7eb;
-                  border:1px solid #334155; margin:4px 0 8px 0;
+                  background:#eef2ff; color:#0f172a;
+                  border:1px solid #cbd5f5; margin:4px 0 8px 0;
                   font-size:0.9rem;
                 ">
                   <strong>Counting Leaders asignados:</strong> {", ".join(leaders)}
