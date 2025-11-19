@@ -391,9 +391,9 @@ if clicked_area_raw:
 # 5) Renderizar el SVG resultante
 st.markdown(
     f"""
-    <div id="svg-wrap" style="position:relative;">
-        {highlighted_svg}
-    </div>
+<div id="svg-wrap" style="position:relative;">
+    {highlighted_svg}
+</div>
     """,
     unsafe_allow_html=True
 )
