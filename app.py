@@ -306,17 +306,22 @@ def get_clicked_area_key():
     return area_raw, normalize_key(area_raw) if area_raw else None
 
 clicked_area_raw, clicked_area_key = get_clicked_area_key()
+# --- Toggle de área seleccionada (click dos veces para deseleccionar) ---
+last_area = st.session_state.get("last_area")
 
-# === INTERFAZ DE USUARIO ===
-st.markdown("### 📊 Resumen rápido del inventario")
-col_total, col_names, col_locations = st.columns(3)
-with col_total:
-    st.metric("Registros en Excel", len(df))
-with col_names:
-    st.metric("Personas únicas", int(df["Nombre"].nunique(dropna=True)))
-with col_locations:
-    st.metric("Áreas registradas", int(df["_LOCATION_KEY_"].nunique(dropna=True)))
-st.caption("Estos totales se calculan directamente desde el archivo Excel cargado.")
+if clicked_area_raw:
+    if last_area == clicked_area_raw:
+        # Si se volvió a hacer click sobre la misma área => deseleccionar
+        clicked_area_raw = None
+        clicked_area_key = None
+        st.query_params.clear()           # limpia ?area= de la barra de direcciones
+        st.session_state["last_area"] = None
+    else:
+        # Nueva área seleccionada
+        st.session_state["last_area"] = clicked_area_raw
+else:
+    # No hay área seleccionada en esta ejecución
+    st.session_state["last_area"] = None
 
 with st.sidebar:
     st.header("🔎 Filtros rápidos")
@@ -397,7 +402,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 
 # --- VISUALIZACIÓN DE RESULTADOS ---
 if clicked_area_key:
