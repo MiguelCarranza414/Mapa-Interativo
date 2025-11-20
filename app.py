@@ -12,6 +12,10 @@ st.set_page_config(layout="wide")
 st.title("📦 Inventario Anual 2025")
 st.subheader("Mapa de áreas interactivas")
 
+if st.button("🏠 Volver al inicio"):
+    st.query_params.clear()
+    st.session_state.pop("last_area", None)
+    st.rerun()
 
 # === ESTILOS PERSONALIZADOS ===
 custom_css = """
@@ -337,7 +341,6 @@ with st.sidebar:
     else:
         selected_activities = []
         st.caption("El Excel no incluye una columna 'Activity' para filtrar.")
-
 df_filtered = df.copy()
 
 if name_query:
