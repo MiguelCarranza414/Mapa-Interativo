@@ -10,12 +10,15 @@ SVG_PATH   = Path("data/mapa.svg")
 
 st.set_page_config(layout="wide")
 st.title("📦 Inventario Anual 2025")
-st.subheader("Mapa de áreas interactivas")
 
-if st.button("🏠 Volver al inicio"):
-    st.query_params.clear()
-    st.session_state.pop("last_area", None)
-    st.rerun()
+header_col, back_col = st.columns([0.10, 0.85])
+with header_col:
+    if st.button("INICIO"):
+        st.query_params.clear()
+        st.session_state.pop("last_area", None)
+        st.rerun()
+with back_col:
+    st.subheader("Mapa de áreas interactivas")
 
 # === ESTILOS PERSONALIZADOS ===
 custom_css = """
@@ -107,7 +110,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Buttons */
 .stButton > button,
 button[kind="primary"] {
-  background: linear-gradient(135deg, var(--accent), #1d4ed8);
+  background: linear-gradient(180deg, var(--navy-900), #f8fbff);
   color: white;
   border: none;
   border-radius: 14px;
@@ -359,11 +362,44 @@ filters_applied = bool(name_query or selected_activities)
 
 highlighted_svg = svg_content
 
-# 1) Por defecto, todas las áreas quedan como "dimmed"
-highlighted_svg = highlighted_svg.replace('class="area"', 'class="area dimmed"')
+# Sólo aplicamos dimmed/active si HAY filtros en la sidebar
+if filters_applied:
+    # 1) Por defecto, todas las áreas quedan como "dimmed"
+    highlighted_svg = highlighted_svg.replace('class="area"', 'class="area dimmed"')
 
-# 2) Determinar qué áreas tienen registros según los filtros actuales (df_filtered)
-active_ids = set()
+    # 2) Determinar qué áreas tienen registros según los filtros actuales (df_filtered)
+    active_ids = set()
+
+    if svg_id_col and svg_id_col in df_filtered.columns:
+        active_ids = set(df_filtered[svg_id_col].dropna().astype(str).unique())
+    elif location_col in df_filtered.columns:
+        active_ids = set(df_filtered[location_col].dropna().astype(str).unique())
+
+    # 3) Marcar esas áreas como "active" (quita dimmed)
+    for area_id in active_ids:
+        highlighted_svg = highlighted_svg.replace(
+            f'class="area dimmed" data-area="{area_id}"',
+            f'class="area active" data-area="{area_id}"'
+        )
+
+# 4) Si hay un área clickeada, marcarla como "selected"
+if clicked_area_raw:
+    if filters_applied:
+        # Caso con filtros: puede venir como active o dimmed
+        highlighted_svg = highlighted_svg.replace(
+            f'class="area active" data-area="{clicked_area_raw}"',
+            f'class="area selected" data-area="{clicked_area_raw}"'
+        )
+        highlighted_svg = highlighted_svg.replace(
+            f'class="area dimmed" data-area="{clicked_area_raw}"',
+            f'class="area selected" data-area="{clicked_area_raw}"'
+        )
+    else:
+        # Caso sin filtros: la clase original es sólo "area"
+        highlighted_svg = highlighted_svg.replace(
+            f'class="area" data-area="{clicked_area_raw}"',
+            f'class="area selected" data-area="{clicked_area_raw}"'
+        )
 
 if svg_id_col and svg_id_col in df_filtered.columns:
     # Usamos SVG_ID como referencia principal

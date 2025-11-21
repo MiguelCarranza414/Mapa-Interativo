@@ -1,14 +1,13 @@
 <svg viewBox="0 0 1289 392" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    .bg { fill:#FFFFFF; }
-    .stroke { fill:#FFFFFF; stroke:black; }
-    .area { cursor:pointer; }
-    .area:hover .stroke { stroke-width:2.5; }
-    .area.selected .stroke { stroke-width:3; stroke:#FC9801; }
-    .area.dimmed .stroke { opacity:0.25; }
-    .area.active .stroke { opacity:1; }
-    .area.selected .stroke { stroke-width:3; stroke:#FC9801; opacity:1; }
-  </style>
+<style>
+  .bg { fill:#FFFFFF; }
+  .stroke { fill:rgba(252,152,1,0.185); stroke:black; }
+  .area { cursor:pointer; }
+  .area:hover .stroke { stroke-width:2.5; }
+  .area.dimmed .stroke { opacity:0.25; }
+  .area.active .stroke { opacity:1; stroke:#FC9801; }  
+  .area.selected .stroke { stroke-width:3; stroke:#FC9801; opacity:1; }
+</style>
 
   <rect class="bg" x="0" y="0" width="1289" height="392"/>
 
@@ -16,6 +15,9 @@
     <g class="area" data-area="SHIP">
       <title>SHIP</title>
       <rect class="stroke" x="0.5" y="6.5" width="99" height="320"/>
+      <!-- label -->
+      <text x="50" y="166" class="area-label" font-size="20"
+            text-anchor="middle" dominant-baseline="middle">SHIP</text>
     </g>
   </a>
 
@@ -31,6 +33,7 @@
       <path class="stroke" d="M660.5 87.5H703.5V115.5H660.5V87.5Z"/>
       <path class="stroke" d="M706.5 87.5H749.5V115.5H706.5V87.5Z"/>
       <path class="stroke" d="M757.5 6.5H791.5V83.5H757.5V6.5Z"/>
+      <text x="425" y="35" class="area-label" font-size="28">AFC</text>
     </g>
   </a>
 
@@ -42,6 +45,7 @@
       <rect class="stroke" x="168.5" y="111.5" width="86" height="47"/>
       <rect class="stroke" x="266.5" y="111.5" width="232" height="47"/>
       <rect class="stroke" x="503.5" y="111.5" width="60" height="47"/>
+      <text x="330" y="145" class="area-label" font-size="28">XDU 1350</text>
     </g>
   </a>
 
@@ -50,6 +54,9 @@
       <title>SKID</title>
       <path class="stroke" d="M266.799 166.5H640.5V203.5H266.799V166.5Z"/>
       <path class="stroke" d="M107.5 166.5H254.776V203.5H107.5V166.5Z"/>
+      <!-- label -->
+      <text x="374" y="185" class="area-label" font-size="20"
+            text-anchor="middle" dominant-baseline="middle">SKID</text>
     </g>
   </a>
 
@@ -58,6 +65,9 @@
       <title>DH L1</title>
       <path class="stroke" d="M266.799 278.5H640.5V326.5H266.799V278.5Z"/>
       <path class="stroke" d="M107.5 278.5H254.776V326.5H107.5V278.5Z"/>
+      <!-- label -->
+      <text x="374" y="302" class="area-label" font-size="20"
+            text-anchor="middle" dominant-baseline="middle">DH L1</text>
     </g>
   </a>
 
@@ -66,6 +76,9 @@
       <title>DH L2</title>
       <path class="stroke" d="M266.799 224.5H640.5V261.5H266.799V224.5Z"/>
       <path class="stroke" d="M107.5 225.5H254.776V262.5H107.5V225.5Z"/>
+      <!-- label -->
+      <text x="374" y="244" class="area-label" font-size="20"
+            text-anchor="middle" dominant-baseline="middle">DH L2</text>
     </g>
   </a>
   
@@ -82,6 +95,7 @@
       <path class="stroke" d="M419.5 74.5H519.5V93.5H419.5V74.5Z"/>
       <path class="stroke" d="M524.5 74.5H572.5V93.5H524.5V74.5Z"/>
       <rect class="stroke" x="573.5" y="51.5" width="67" height="42"/>
+      <text x="300" y="90" class="area-label">XDM</text>
     </g>
   </a>
 
@@ -89,6 +103,9 @@
     <g class="area" data-area="XDU_100">
       <title>XDU 100</title>
       <rect class="stroke" x="660.5" y="122.5" width="89" height="28"/>
+      <!-- label -->
+      <text x="705" y="136.5" class="area-label" font-size="20"
+            text-anchor="middle" dominant-baseline="middle">XDU 100</text>
     </g>
   </a>
 
@@ -96,6 +113,9 @@
     <g class="area" data-area="Kits">
       <title>Kits</title>
       <rect class="stroke" x="757.5" y="87.5" width="34" height="63"/>
+      <!-- label -->
+      <text x="774.5" y="119" class="area-label" font-size="16"
+            text-anchor="middle" dominant-baseline="middle">Kits</text>
     </g>
   </a>
 
@@ -103,6 +123,9 @@
     <g class="area" data-area="MRB">
       <title>MRB</title>
       <rect class="stroke" x="1169.5" y="111.5" width="106" height="41"/>
+      <!-- label -->
+      <text x="1222.5" y="132" class="area-label" font-size="18"
+            text-anchor="middle" dominant-baseline="middle">MRB</text>
     </g>
   </a>
 
@@ -114,6 +137,9 @@
       <path class="stroke" d="M660.5 197.5H821.5V214.5H660.5V197.5Z"/>
       <path class="stroke" d="M827.5 166.5H875.5V214.5H827.5V166.5Z"/>
       <path class="stroke" d="M884.5 166.5H911.5V214.5H884.5V166.5Z"/>
+      <!-- label -->
+      <text x="786" y="255" class="area-label" font-size="26"
+            text-anchor="middle" dominant-baseline="middle">MC</text>
     </g>
   </a>
 
@@ -124,6 +150,11 @@
       <path class="stroke" d="M759.5 286.5H776.5V302.5H759.5V286.5Z"/>
       <path class="stroke" d="M660.5 286.5H738.5V302.5H660.5V286.5Z"/>
       <path class="stroke" d="M741.5 286.5H757.5V302.5H741.5V286.5Z"/>
+      <!-- label -->
+      <text x="748" y="295.5" class="area-label" font-size="18"
+            text-anchor="middle" dominant-baseline="middle">C</text>
+      <text x="768.5" y="295.5" class="area-label" font-size="18"
+            text-anchor="middle" dominant-baseline="middle">R</text>
     </g>
   </a>
 
@@ -133,6 +164,9 @@
       <rect class="stroke" x="660.5" y="305.5" width="194" height="24"/>
       <path class="stroke" d="M859.5 286.5H883.5V329.5H859.5V286.5Z"/>
       <path class="stroke" d="M886.5 286.5H911.5V329.5H886.5V286.5Z"/>
+      <!-- label (centrado en el rect grande) -->
+      <text x="757.5" y="317.5" class="area-label" font-size="18"
+            text-anchor="middle" dominant-baseline="middle">Blower</text>
     </g>
   </a>
 
@@ -144,6 +178,9 @@
       <path class="stroke" d="M923.5 260.5H1008.5V280.5H923.5V260.5Z"/>
       <path class="stroke" d="M923.5 283.5H1007.5V308.5H923.5V283.5Z"/>
       <path class="stroke" d="M923.5 310.5H1007.5V329.5H923.5V310.5Z"/>
+      <!-- label -->
+      <text x="966" y="300" class="area-label" font-size="16"
+            text-anchor="middle" dominant-baseline="middle">Sheet Metal</text>
     </g>
   </a>
 
@@ -152,6 +189,9 @@
       <title>EP</title>
       <path class="stroke" d="M863.5 342.5H895.5V391.5H863.5V342.5Z"/>
       <path class="stroke" d="M895.5 342.5H1078.5V391.5H895.5V342.5Z"/>
+      <!-- label -->
+      <text x="971" y="367" class="area-label" font-size="18"
+            text-anchor="middle" dominant-baseline="middle">EP</text>
     </g>
   </a>
 
@@ -161,6 +201,9 @@
       <rect class="stroke" x="1078.5" y="166.5" width="115" height="78"/>
       <path class="stroke" d="M1023.5 166.5H1075.5V218.5H1023.5V166.5Z"/>
       <path class="stroke" d="M1023.5 221.5H1075.5V244.5H1023.5V221.5Z"/>
+      <!-- label -->
+      <text x="1133.5" y="205.5" class="area-label" font-size="18"
+            text-anchor="middle" dominant-baseline="middle">Piping</text>
     </g>
   </a>
 
@@ -168,12 +211,19 @@
     <g class="area" data-area="PRE_L1">
       <title>PRE L1</title>
       <rect class="stroke" x="1023.5" y="253.5" width="114" height="27"/>
+      <!-- label -->
+      <text x="1080.5" y="267" class="area-label" font-size="18"
+            text-anchor="middle" dominant-baseline="middle">PRE L1</text>
     </g>
   </a>
+
   <a href="?area=Prototypes" target="_self">
     <g class="area" data-area="Prototypes">
       <title>Prototypes</title>
       <rect class="stroke" x="1197.5" y="166.5" width="52" height="78"/>
+      <!-- label -->
+      <text x="1223.5" y="205.5" class="area-label" font-size="12"
+            text-anchor="middle" dominant-baseline="middle">Prototypes</text>
     </g>
   </a>
 
@@ -182,6 +232,9 @@
       <title>Coils Shop</title>
       <path class="stroke" d="M1247.5 319.587L1242.12 337.5H1023.5V283.5H1247.5V319.587Z"/>
       <rect class="stroke" x="1146.5" y="253.5" width="101" height="27"/>
+      <!-- label -->
+      <text x="1135.5" y="310" class="area-label" font-size="18"
+            text-anchor="middle" dominant-baseline="middle">Coils Shop</text>
     </g>
   </a>
 
@@ -189,6 +242,9 @@
     <g class="area" data-area="Warehouse">
       <title>Warehouse</title>
       <path class="stroke" d="M1275.5 0.5V111.5H1169.5V152.5H863.5V45.5H848.5V0.5H1275.5Z"/>
+      <!-- label -->
+      <text x="1069.5" y="76.5" class="area-label" font-size="22"
+            text-anchor="middle" dominant-baseline="middle">Warehouse</text>
     </g>
   </a>
 
@@ -196,6 +252,9 @@
     <g class="area" data-area="Fastenal">
       <title>Fastenal</title>
       <path class="stroke" d="M848.5 0.5V45.5H863.5V152.5H799.5V0.5H848.5Z"/>
+      <!-- label -->
+      <text x="831.5" y="76.5" class="area-label" font-size="18"
+            text-anchor="middle" dominant-baseline="middle">Fastenal</text>
     </g>
   </a>
 
@@ -203,6 +262,9 @@
     <g class="area" data-area="Cuchilla">
       <title>Cuchilla</title>
       <path class="stroke" d="M1288.5 183.14L1259.25 280.5H1258.5V166.5H1288.5V183.14Z"/>
+      <!-- label -->
+      <text x="1273.5" y="223.5" class="area-label" font-size="1"
+            text-anchor="middle" dominant-baseline="middle">Cuchilla</text>
     </g>
   </a>
 
