@@ -11,29 +11,6 @@ SVG_PATH   = Path("data/mapa.svg")
 st.set_page_config(layout="wide")
 st.title("📦 Inventario Anual 2025")
 
-header_col, back_col = st.columns([0.10, 0.90])
-with header_col:
-    if st.button("INICIO"):
-        st.query_params.clear()
-        st.session_state.pop("last_area", None)
-        st.rerun()
-with back_col:
-    st.subheader("🔎 Filtros rápidos")
-    st.caption("Aplica filtros para explorar el personal sin necesidad de hacer clic en el mapa.")
-    filter_name_col, filter_activity_col = st.columns([0.6, 1.4])
-    with filter_name_col:
-        name_query = st.text_input("Buscar por Número")
-    with filter_activity_col:
-        activity_options = []
-        if "Activity" in df.columns:
-            activity_options = sorted(df["Activity"].dropna().unique())
-
-        if activity_options:
-            selected_activities = st.multiselect("Filtrar por actividad", activity_options)
-        else:
-            selected_activities = []
-            st.caption("El Excel no incluye una columna 'Activity' para filtrar.")
-
 # === ESTILOS PERSONALIZADOS ===
 custom_css = """
 <style>
@@ -340,6 +317,27 @@ except Exception as e:
     st.error(f"❌ No pude cargar el Excel: {e}")
     st.stop()
 
+header_col, back_col = st.columns([0.10, 0.90])
+with header_col:
+    if st.button("INICIO"):
+        st.query_params.clear()
+        st.session_state.pop("last_area", None)
+        st.rerun()
+with back_col:
+    filter_name_col, filter_activity_col = st.columns([0.6, 0.6])
+    with filter_name_col:
+        name_query = st.text_input("Buscar por Número")
+    with filter_activity_col:
+        activity_options = []
+        if "Activity" in df.columns:
+            activity_options = sorted(df["Activity"].dropna().unique())
+
+        if activity_options:
+            selected_activities = st.multiselect("Filtrar por actividad", activity_options)
+        else:
+            selected_activities = []
+            st.caption("El Excel no incluye una columna 'Activity' para filtrar.")
+
 # 2. Carga Segura de SVG
 if not SVG_PATH.exists():
     st.error(f"❌ No encontré el SVG en {SVG_PATH.resolve()}")
@@ -418,24 +416,6 @@ else:
     # No hay área seleccionada en esta ejecución
     st.session_state["last_area"] = None
 
-st.markdown(
-    """
-    <div class="hero">
-      <div class="emoji">✨</div>
-      <div class="text">
-        <h3>Vista renovada del inventario</h3>
-        <p>Explora el mapa interactivo, aplica filtros rápidos y descubre responsables por área sin perder detalle.</p>
-      </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-metrics_col1, metrics_col2, metrics_col3, metrics_col4 = st.columns(4)
-metrics_col1.metric("Registros totales", f"{total_registros:,}".replace(",", "."))
-metrics_col2.metric("Áreas únicas", f"{total_areas}")
-metrics_col3.metric("Actividades", f"{total_actividades}")
-metrics_col4.metric("Counting Leaders", f"{leaders_total}")
 df_filtered = df.copy()
 
 if name_query:
@@ -525,7 +505,7 @@ if clicked_area_raw:
     )
 
 # 5) Renderizar el SVG resultante
-map_col, info_col = st.columns([1.4, 1])
+map_col, info_col = st.columns([4, 1])
 
 with map_col:
     st.subheader("🗺️ Mapa interactivo")
@@ -533,7 +513,6 @@ with map_col:
         f"""
     <div id="svg-wrap" style="position:relative;">
         {highlighted_svg}
-    </div>
         """,
         unsafe_allow_html=True,
     )
@@ -541,12 +520,8 @@ with map_col:
     legend_html = """
     <div class="map-legend">
       <div class="legend-item">
-        <span class="legend-swatch" style="background:#2563eb;"></span>
-        Seleccionada desde el mapa
-      </div>
-      <div class="legend-item">
-        <span class="legend-swatch" style="background:#93c5fd;"></span>
-        Coincide con filtros activos
+        <span class="legend-swatch" style="background:#FC9801;"></span>
+        Area seleccionada/ Filtrada
       </div>
       <div class="legend-item">
         <span class="legend-swatch" style="background:#e5e7eb;"></span>
