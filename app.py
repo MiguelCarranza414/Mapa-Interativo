@@ -62,6 +62,43 @@ h1, h2, h3, h4, h5, h6 {
   padding: 1.5rem 2rem 2rem 2rem;
 }
 
+.hero {
+  background: linear-gradient(120deg, rgba(37, 99, 235, 0.12), rgba(232, 240, 255, 0.8));
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 18px;
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.hero .emoji {
+  font-size: 1.7rem;
+}
+
+.hero .text {
+  color: #0f172a;
+}
+
+.hero .text h3 {
+  margin: 0 0 0.1rem 0;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #eef2ff;
+  border: 1px solid #d9e3ff;
+  color: #1d4ed8;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
 [data-testid="stMarkdownContainer"] > p,
 [data-testid="stMarkdownContainer"] > div {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 250, 255, 0.96));
@@ -169,6 +206,33 @@ div[data-testid="stTable"] tbody tr:hover {
 #svg-wrap svg {
   width: 100%;
   height: auto;
+}
+
+.map-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.map-legend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(240, 245, 255, 0.96));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(15, 23, 42, 0.2);
 }
 
 /* Chips & inline pills */
@@ -297,6 +361,16 @@ if oracle_location_col:
 
 display_columns = build_display_columns(df, location_col)
 
+# 5. Métricas generales para el tablero
+total_registros = len(df)
+total_areas = int(df[location_col].nunique()) if location_col in df.columns else 0
+total_actividades = int(df["Activity"].nunique()) if "Activity" in df.columns else 0
+leaders_total = 0
+if "Activity" in df.columns and "Nombre" in df.columns:
+    leaders_total = int(
+        df[df["Activity"] == "Counting Leader"]["Nombre"].nunique()
+    )
+
 # 5. Leer ?area= desde la URL
 def get_clicked_area_key():
     """Lee y normaliza el parámetro 'area' de la URL."""
@@ -329,6 +403,25 @@ if clicked_area_raw:
 else:
     # No hay área seleccionada en esta ejecución
     st.session_state["last_area"] = None
+
+st.markdown(
+    """
+    <div class="hero">
+      <div class="emoji">✨</div>
+      <div class="text">
+        <h3>Vista renovada del inventario</h3>
+        <p>Explora el mapa interactivo, aplica filtros rápidos y descubre responsables por área sin perder detalle.</p>
+      </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+metrics_col1, metrics_col2, metrics_col3, metrics_col4 = st.columns(4)
+metrics_col1.metric("Registros totales", f"{total_registros:,}".replace(",", "."))
+metrics_col2.metric("Áreas únicas", f"{total_areas}")
+metrics_col3.metric("Actividades", f"{total_actividades}")
+metrics_col4.metric("Counting Leaders", f"{leaders_total}")
 
 with st.sidebar:
     st.header("🔎 Filtros rápidos")
@@ -433,14 +526,56 @@ if clicked_area_raw:
     )
 
 # 5) Renderizar el SVG resultante
-st.markdown(
-    f"""
-<div id="svg-wrap" style="position:relative;">
-    {highlighted_svg}
-</div>
-    """,
-    unsafe_allow_html=True
-)
+map_col, info_col = st.columns([1.4, 1])
+
+with map_col:
+    st.subheader("🗺️ Mapa interactivo")
+    st.markdown(
+        f"""
+    <div id="svg-wrap" style="position:relative;">
+        {highlighted_svg}
+    </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    legend_html = """
+    <div class="map-legend">
+      <div class="legend-item">
+        <span class="legend-swatch" style="background:#2563eb;"></span>
+        Seleccionada desde el mapa
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch" style="background:#93c5fd;"></span>
+        Coincide con filtros activos
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch" style="background:#e5e7eb;"></span>
+        Sin coincidencias actuales
+      </div>
+    </div>
+    """
+    st.markdown(legend_html, unsafe_allow_html=True)
+
+with info_col:
+    info_col.markdown(
+        """
+        <div class="pill">📌 Tips de uso</div>
+        <ul>
+          <li>Haz clic en cualquier área del mapa para ver responsables asignados.</li>
+          <li>Combina filtros en la barra lateral para resaltar zonas con registros.</li>
+          <li>Utiliza el botón INICIO para limpiar selección y parámetros.</li>
+        </ul>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if filters_applied:
+        info_col.success(
+            f"Filtros aplicados: {len(df_filtered)} coincidencia(s) visibles en el mapa."
+        )
+    else:
+        info_col.info("Sin filtros activos: se muestran todos los registros del inventario.")
 
 # --- VISUALIZACIÓN DE RESULTADOS ---
 if clicked_area_key:
