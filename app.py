@@ -11,14 +11,28 @@ SVG_PATH   = Path("data/mapa.svg")
 st.set_page_config(layout="wide")
 st.title("📦 Inventario Anual 2025")
 
-header_col, back_col = st.columns([0.10, 0.85])
+header_col, back_col = st.columns([0.10, 0.90])
 with header_col:
     if st.button("INICIO"):
         st.query_params.clear()
         st.session_state.pop("last_area", None)
         st.rerun()
 with back_col:
-    st.subheader("Mapa de áreas interactivas")
+    st.subheader("🔎 Filtros rápidos")
+    st.caption("Aplica filtros para explorar el personal sin necesidad de hacer clic en el mapa.")
+    filter_name_col, filter_activity_col = st.columns([0.6, 1.4])
+    with filter_name_col:
+        name_query = st.text_input("Buscar por Número")
+    with filter_activity_col:
+        activity_options = []
+        if "Activity" in df.columns:
+            activity_options = sorted(df["Activity"].dropna().unique())
+
+        if activity_options:
+            selected_activities = st.multiselect("Filtrar por actividad", activity_options)
+        else:
+            selected_activities = []
+            st.caption("El Excel no incluye una columna 'Activity' para filtrar.")
 
 # === ESTILOS PERSONALIZADOS ===
 custom_css = """
@@ -422,21 +436,6 @@ metrics_col1.metric("Registros totales", f"{total_registros:,}".replace(",", "."
 metrics_col2.metric("Áreas únicas", f"{total_areas}")
 metrics_col3.metric("Actividades", f"{total_actividades}")
 metrics_col4.metric("Counting Leaders", f"{leaders_total}")
-
-with st.sidebar:
-    st.header("🔎 Filtros rápidos")
-    st.caption("Aplica filtros para explorar el personal sin necesidad de hacer clic en el mapa.")
-    name_query = st.text_input("Buscar por Número")
-
-    activity_options = []
-    if "Activity" in df.columns:
-        activity_options = sorted(df["Activity"].dropna().unique())
-
-    if activity_options:
-        selected_activities = st.multiselect("Filtrar por actividad", activity_options)
-    else:
-        selected_activities = []
-        st.caption("El Excel no incluye una columna 'Activity' para filtrar.")
 df_filtered = df.copy()
 
 if name_query:
