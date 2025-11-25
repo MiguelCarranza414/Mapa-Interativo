@@ -194,6 +194,15 @@
             text-anchor="middle" dominant-baseline="middle">EP</text>
     </g>
   </a>
+    <a href="?area=MTY3" target="_self">
+    <g class="area" data-area="MTY3">
+      <title>MTY 3</title>
+      <path class="stroke" d="M107.5 342.5H254.776V391.5H107.5V342.5Z"/>
+      <!-- label -->
+      <text x="175" y="367" class="area-label" font-size="18"
+            text-anchor="middle" dominant-baseline="middle">MTY 3</text>
+    </g>
+  </a>
 
   <a href="?area=Piping" target="_self">
     <g class="area" data-area="Piping">

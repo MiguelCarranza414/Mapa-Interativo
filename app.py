@@ -7,10 +7,9 @@ import xml.etree.ElementTree as ET
 # === CONFIGURACIÓN ===
 EXCEL_PATH = Path(r"C:\Inventario\data\roles_areas.xlsx")
 SVG_PATH   = Path("data/mapa.svg")
-
 st.set_page_config(layout="wide")
 st.title("📦 Inventario Anual 2025")
-
+st.markdown("Del 2 al 7 de enero del 2026")
 # === ESTILOS PERSONALIZADOS ===
 custom_css = """
 <style>
@@ -257,7 +256,7 @@ def load_svg(path: Path) -> str:
 
 def build_display_columns(dataframe: pd.DataFrame, location_column: str) -> list[str]:
     """Devuelve la lista de columnas a mostrar respetando la disponibilidad en el DataFrame."""
-    desired_order = ["Número", "Nombre", "Activity", location_column, "Oracle Location", "SVG_ID"]
+    desired_order = ["Número", "Nombre", "Activity", "Oracle Location"]
     return [col for col in desired_order if col in dataframe.columns]
 
 def normalize_key(s: str) -> str:
@@ -316,7 +315,6 @@ except FileNotFoundError:
 except Exception as e:
     st.error(f"❌ No pude cargar el Excel: {e}")
     st.stop()
-
 header_col, back_col = st.columns([0.10, 0.90])
 with header_col:
     if st.button("INICIO"):
@@ -505,10 +503,12 @@ if clicked_area_raw:
     )
 
 # 5) Renderizar el SVG resultante
-map_col, info_col = st.columns([4, 1])
+map_col, info_col = st.columns([3, 1])
 
 with map_col:
-    st.subheader("🗺️ Mapa interactivo")
+    st.subheader("🗺️ Mapa interactivo.")
+    st.caption("##### Todas las actividades se realizarán en los 3 turnos de planta; debes definir en qué turno estarás apoyando, con tu respectivo líder."
+    )
     st.markdown(
         f"""
     <div id="svg-wrap" style="position:relative;">
@@ -532,170 +532,133 @@ with map_col:
     st.markdown(legend_html, unsafe_allow_html=True)
 
 with info_col:
-    info_col.markdown(
-        """
-        <div class="pill">📌 Tips de uso</div>
-        <ul>
-          <li>Haz clic en cualquier área del mapa para ver responsables asignados.</li>
-          <li>Combina filtros en la barra lateral para resaltar zonas con registros.</li>
-          <li>Utiliza el botón INICIO para limpiar selección y parámetros.</li>
-        </ul>
-        """,
-        unsafe_allow_html=True,
-    )
+    # --- VISUALIZACIÓN DE RESULTADOS ---
+    if clicked_area_key:
+        # 1. Obtener la etiqueta amigable del SVG
+        area_label = get_svg_title(svg_content, clicked_area_raw) or clicked_area_raw
+
+        # 2. Filtrar DataFrame
+        key_columns = [
+            col for col in ["_SVG_ID_KEY_", "_LOCATION_KEY_", "_ORACLE_LOCATION_KEY_"]
+            if col in df_filtered.columns
+        ]
+
+        if key_columns:
+            mask = pd.Series(False, index=df_filtered.index)
+            for col in key_columns:
+                mask = mask | (df_filtered[col] == clicked_area_key)
+            df_filtrado = df_filtered[mask]
+        else:
+            df_filtrado = df_filtered[df_filtered["_LOCATION_KEY_"] == clicked_area_key]
+
+        if not df_filtrado.empty:
+            # Si hay registros, toma la etiqueta desde el Excel como nombre legible
+            if location_col in df_filtrado.columns:
+                excel_label = df_filtrado[location_col].dropna().astype(str)
+                if not excel_label.empty:
+                    area_label = excel_label.iloc[0]
+
+            # --- NUEVO: detectar leaders y contadores en esta área ---
+            leaders_df = df_filtrado[df_filtrado["Activity"] == "Counting Leader"]
+            counters_df = df_filtrado[df_filtrado["Activity"] == "Counting"]
+
+            leaders = leaders_df["Nombre"].unique()
+            num_counters = int(counters_df["Nombre"].nunique()) if not counters_df.empty else 0
+            st.subheader(f"👥 Personal Asignado a: **{area_label}**")
+
+            # Mostrar resumen de leaders si existen
+            if len(leaders) > 0:
+                # Chip resumen
+                st.markdown(
+                    f"""
+                    <div style="
+                    padding:8px 12px; border-radius:12px;
+                    background:#eef2ff; color:#0f172a;
+                    border:1px solid #cbd5f5; margin:4px 0 8px 0;
+                    font-size:0.9rem;
+                    ">
+                    <strong>Counting Leaders asignados:</strong> {", ".join(leaders)}
+                    {"&nbsp;·&nbsp;("+str(num_counters)+" contadores)" if num_counters else ""}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+            else:
+                # Si no hay leaders, puedes dejarlo callado o mostrar un aviso suave
+                st.caption("No se encontraron registros con Activity = 'Counting Leader' para esta área.")
+
+            # --- Listado general de personas del área (como antes) ---
+            nombres = df_filtrado["Nombre"].unique()
+
+        # --- Listado general de personas del área, con Activity ---
+        if "Activity" in df_filtrado.columns:
+            # Agrupar por nombre y juntar las activities únicas de cada persona
+            personas = (
+                df_filtrado[["Nombre", "Activity"]]
+                .fillna({"Activity": ""})
+                .groupby("Nombre")["Activity"]
+                .unique()
+                .reset_index()
+            )
+            total_personas = len(personas)
+
+            if total_personas > 0:
+                st.info(f"Se encontraron **{total_personas}** entradas de personal en esta área.")
+
+                st.markdown("##### Lista de Nombres:")
+                for _, row in personas.iterrows():
+                    nombre = row["Nombre"]
+                    acts = [a for a in row["Activity"] if a]  # quitar vacíos
+                    if acts:
+                        # Si una persona tiene varias actividades, las juntamos con coma
+                        activity_label = ", ".join(sorted(set(acts)))
+                        st.markdown(f"- **{nombre}** — _{activity_label}_")
+                    else:
+                        st.markdown(f"- **{nombre}**")
+            else:
+                st.warning(
+                    "El área está cliqueada, pero no se encontraron nombres asignados "
+                    "en el Excel para esa ubicación."
+                )
+        else:
+            # Fallback por si algún día no existiera la columna Activity
+            nombres = df_filtrado["Nombre"].unique()
+            if len(nombres) > 0:
+                st.info(f"Se encontraron **{len(nombres)}** entradas de personal en esta área.")
+                st.markdown("##### Lista de Nombres:")
+                for nombre in nombres:
+                    st.markdown(f"- **{nombre}**")
+            else:
+                st.warning(
+                    "El área está cliqueada, pero no se encontraron nombres asignados "
+                    "en el Excel para esa ubicación."
+                )
+
+
+    else:
+        """"""
+    st.markdown("#### 🔍 Explorador de registros filtrados")
 
     if filters_applied:
-        info_col.success(
-            f"Filtros aplicados: {len(df_filtered)} coincidencia(s) visibles en el mapa."
-        )
+        st.caption(f"Los filtros actuales devuelven {len(df_filtered)} registro(s) del Excel.")
     else:
-        info_col.info("Sin filtros activos: se muestran todos los registros del inventario.")
+       """"""""
 
-# --- VISUALIZACIÓN DE RESULTADOS ---
-if clicked_area_key:
-    # 1. Obtener la etiqueta amigable del SVG
-    area_label = get_svg_title(svg_content, clicked_area_raw) or clicked_area_raw
-
-    # Mostrar chip de área seleccionada
-    st.markdown(
-        f"""
-        <div style="
-          display:inline-block; padding:8px 12px; border-radius:999px;
-          background:#eef2ff; color:#0f172a; font-weight:600;
-          border:1px solid #c7d2fe; margin:6px 0;
-        ">
-          Área clickeada (SVG): {area_label}
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # 2. Filtrar DataFrame
-    key_columns = [
-        col for col in ["_SVG_ID_KEY_", "_LOCATION_KEY_", "_ORACLE_LOCATION_KEY_"]
-        if col in df_filtered.columns
-    ]
-
-    if key_columns:
-        mask = pd.Series(False, index=df_filtered.index)
-        for col in key_columns:
-            mask = mask | (df_filtered[col] == clicked_area_key)
-        df_filtrado = df_filtered[mask]
+    if df_filtered.empty:
+        st.warning("No se encontraron registros que coincidan con los filtros seleccionados.")
     else:
-        df_filtrado = df_filtered[df_filtered["_LOCATION_KEY_"] == clicked_area_key]
+        if display_columns:
+            filtered_table = df_filtered[display_columns].rename(
+                columns={location_col: "Ubicación Excel"}
+            )
+            st.dataframe(filtered_table, width="stretch")
 
-    if not df_filtrado.empty:
-        # Si hay registros, toma la etiqueta desde el Excel como nombre legible
-        if location_col in df_filtrado.columns:
-            excel_label = df_filtrado[location_col].dropna().astype(str)
-            if not excel_label.empty:
-                area_label = excel_label.iloc[0]
-
-        # --- NUEVO: detectar leaders y contadores en esta área ---
-        leaders_df = df_filtrado[df_filtrado["Activity"] == "Counting Leader"]
-        counters_df = df_filtrado[df_filtrado["Activity"] == "Counting"]
-
-        leaders = leaders_df["Nombre"].unique()
-        num_counters = int(counters_df["Nombre"].nunique()) if not counters_df.empty else 0
-
-        st.markdown("---")
-        st.subheader(f"👥 Personal Asignado a: **{area_label}**")
-
-        # Mostrar resumen de leaders si existen
-        if len(leaders) > 0:
-            # Chip resumen
-            st.markdown(
-                f"""
-                <div style="
-                  padding:8px 12px; border-radius:12px;
-                  background:#eef2ff; color:#0f172a;
-                  border:1px solid #cbd5f5; margin:4px 0 8px 0;
-                  font-size:0.9rem;
-                ">
-                  <strong>Counting Leaders asignados:</strong> {", ".join(leaders)}
-                  {"&nbsp;·&nbsp;("+str(num_counters)+" contadores)" if num_counters else ""}
-                </div>
-                """,
-                unsafe_allow_html=True
+            csv_data = filtered_table.to_csv(index=False).encode("utf-8-sig")
+            st.download_button(
+                "⬇️ Descargar resultados filtrados (CSV)",
+                data=csv_data,
+                file_name="inventario_filtrado.csv",
+                mime="text/csv",
             )
         else:
-            # Si no hay leaders, puedes dejarlo callado o mostrar un aviso suave
-            st.caption("No se encontraron registros con Activity = 'Counting Leader' para esta área.")
-
-        # --- Listado general de personas del área (como antes) ---
-        nombres = df_filtrado["Nombre"].unique()
-
-    # --- Listado general de personas del área, con Activity ---
-    if "Activity" in df_filtrado.columns:
-        # Agrupar por nombre y juntar las activities únicas de cada persona
-        personas = (
-            df_filtrado[["Nombre", "Activity"]]
-            .fillna({"Activity": ""})
-            .groupby("Nombre")["Activity"]
-            .unique()
-            .reset_index()
-        )
-        total_personas = len(personas)
-
-        if total_personas > 0:
-            st.info(f"Se encontraron **{total_personas}** entradas de personal en esta área.")
-
-            st.markdown("##### Lista de Nombres:")
-            for _, row in personas.iterrows():
-                nombre = row["Nombre"]
-                acts = [a for a in row["Activity"] if a]  # quitar vacíos
-                if acts:
-                    # Si una persona tiene varias actividades, las juntamos con coma
-                    activity_label = ", ".join(sorted(set(acts)))
-                    st.markdown(f"- **{nombre}** — _{activity_label}_")
-                else:
-                    st.markdown(f"- **{nombre}**")
-        else:
-            st.warning(
-                "El área está cliqueada, pero no se encontraron nombres asignados "
-                "en el Excel para esa ubicación."
-            )
-    else:
-        # Fallback por si algún día no existiera la columna Activity
-        nombres = df_filtrado["Nombre"].unique()
-        if len(nombres) > 0:
-            st.info(f"Se encontraron **{len(nombres)}** entradas de personal en esta área.")
-            st.markdown("##### Lista de Nombres:")
-            for nombre in nombres:
-                st.markdown(f"- **{nombre}**")
-        else:
-            st.warning(
-                "El área está cliqueada, pero no se encontraron nombres asignados "
-                "en el Excel para esa ubicación."
-            )
-
-
-else:
-    st.info("Aún no has seleccionado un área (desde el SVG).")
-
-st.markdown("---")
-st.markdown("### 🔍 Explorador de registros filtrados")
-
-if filters_applied:
-    st.caption(f"Los filtros actuales devuelven {len(df_filtered)} registro(s) del Excel.")
-else:
-    st.caption("Muestra los datos completos del Excel. Usa los filtros de la barra lateral para acotar los resultados.")
-
-if df_filtered.empty:
-    st.warning("No se encontraron registros que coincidan con los filtros seleccionados.")
-else:
-    if display_columns:
-        filtered_table = df_filtered[display_columns].rename(
-            columns={location_col: "Ubicación Excel"}
-        )
-        st.dataframe(filtered_table, width="stretch")
-
-        csv_data = filtered_table.to_csv(index=False).encode("utf-8-sig")
-        st.download_button(
-            "⬇️ Descargar resultados filtrados (CSV)",
-            data=csv_data,
-            file_name="inventario_filtrado.csv",
-            mime="text/csv",
-        )
-    else:
-        st.info("No hay columnas disponibles para mostrar o exportar desde el Excel.")
+            st.info("No hay columnas disponibles para mostrar o exportar desde el Excel.")
