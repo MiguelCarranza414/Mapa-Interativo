@@ -8,8 +8,8 @@ import xml.etree.ElementTree as ET
 EXCEL_PATH = Path(r"C:\Inventario\data\roles_areas.xlsx")
 SVG_PATH   = Path("data/mapa.svg")
 st.set_page_config(layout="wide")
-st.title("📦 Inventario Anual 2025")
-st.markdown("Del 2 al 7 de enero del 2026")
+st.header("📦 Inventario Anual 2025. Mapa interactivo de actividades, áreas y turnos.")
+st.markdown("Del 3 al 7 de enero del 2026 (Solo mesa de control del 2 al 7 de Enero del 2026)")
 # === ESTILOS PERSONALIZADOS ===
 custom_css = """
 <style>
@@ -138,7 +138,7 @@ h1, h2, h3, h4, h5, h6 {
 .stButton > button,
 button[kind="primary"] {
   background: linear-gradient(180deg, var(--navy-900), #f8fbff);
-  color: white;
+  color: black;
   border: none;
   border-radius: 14px;
   padding: 0.65rem 1.2rem;
@@ -256,7 +256,7 @@ def load_svg(path: Path) -> str:
 
 def build_display_columns(dataframe: pd.DataFrame, location_column: str) -> list[str]:
     """Devuelve la lista de columnas a mostrar respetando la disponibilidad en el DataFrame."""
-    desired_order = ["Número", "Nombre", "Activity", "Oracle Location"]
+    desired_order = ["Número", "Nombre", "Activity",location_column, "Turno"]
     return [col for col in desired_order if col in dataframe.columns]
 
 def normalize_key(s: str) -> str:
@@ -317,21 +317,21 @@ except Exception as e:
     st.stop()
 header_col, back_col = st.columns([0.10, 0.90])
 with header_col:
-    if st.button("INICIO"):
+    if st.button("# Inicio"):
         st.query_params.clear()
         st.session_state.pop("last_area", None)
         st.rerun()
 with back_col:
     filter_name_col, filter_activity_col = st.columns([0.6, 0.6])
     with filter_name_col:
-        name_query = st.text_input("Buscar por Número")
+        name_query = st.text_input("#### Buscar por Número")
     with filter_activity_col:
         activity_options = []
         if "Activity" in df.columns:
             activity_options = sorted(df["Activity"].dropna().unique())
 
         if activity_options:
-            selected_activities = st.multiselect("Filtrar por actividad", activity_options)
+            selected_activities = st.multiselect("#### Filtrar por actividad", activity_options)
         else:
             selected_activities = []
             st.caption("El Excel no incluye una columna 'Activity' para filtrar.")
@@ -503,12 +503,9 @@ if clicked_area_raw:
     )
 
 # 5) Renderizar el SVG resultante
-map_col, info_col = st.columns([3, 1])
+map_col, info_col = st.columns([0.7, 0.3])
 
 with map_col:
-    st.subheader("🗺️ Mapa interactivo.")
-    st.caption("##### Todas las actividades se realizarán en los 3 turnos de planta; debes definir en qué turno estarás apoyando, con tu respectivo líder."
-    )
     st.markdown(
         f"""
     <div id="svg-wrap" style="position:relative;">
@@ -637,7 +634,7 @@ with info_col:
 
     else:
         """"""
-    st.markdown("#### 🔍 Explorador de registros filtrados")
+    st.markdown("##### 🔍 Explorador de registros filtrados")
 
     if filters_applied:
         st.caption(f"Los filtros actuales devuelven {len(df_filtered)} registro(s) del Excel.")
@@ -649,7 +646,7 @@ with info_col:
     else:
         if display_columns:
             filtered_table = df_filtered[display_columns].rename(
-                columns={location_col: "Ubicación Excel"}
+                columns={location_col: "Location"}
             )
             st.dataframe(filtered_table, width="stretch")
 
