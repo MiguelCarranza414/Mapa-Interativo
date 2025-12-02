@@ -7,6 +7,7 @@
   .area.dimmed .stroke { opacity:0.25; }
   .area.active .stroke { opacity:1; stroke:#FC9801; }  
   .area.selected .stroke { stroke-width:3; stroke:#FC9801; opacity:1; }
+  
 </style>
 
   <rect class="bg" x="0" y="0" width="1289" height="392"/>

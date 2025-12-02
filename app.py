@@ -12,9 +12,9 @@ with st.container():
     st.markdown(
         """
         <div>
-            <h2>📦 Inventario Anual 2025. Mapa interactivo de actividades, áreas y turnos.</h2>
-            <p style="margin-left: 25em;">Del 3 al 7 de enero del 2026<p>
-            <p style="margin-left: 20em;"><b>(Solo mesa de control del 2 al 7 de Enero del 2026)</b></p>
+            <h2 style='text-align: center;'>📦 Inventario Anual 2025. Mapa interactivo de actividades, áreas y turnos.</h1>
+            <p style='text-align: center;'>Del 3 al 7 de enero del 2026<p>
+            <h6 style='text-align: center;'><b>(Solo mesa de control del 2 al 7 de Enero del 2026)</b></h6>
         </div>
         """,
         unsafe_allow_html=True
