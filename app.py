@@ -332,6 +332,10 @@ except FileNotFoundError:
 except Exception as e:
     st.error(f"❌ No pude cargar el Excel: {e}")
     st.stop()
+# Normalizar tipos problemáticos para Arrow/Streamlit
+if "Turno" in df.columns:
+    # La columna puede venir con mezclas de números y textos; la convertimos a str
+    df["Turno"] = df["Turno"].map(lambda v: "" if pd.isna(v) else str(v))
 header_col, back_col = st.columns([0.10, 0.90])
 with header_col:
     if st.button("# Inicio"):
