@@ -103,7 +103,7 @@
       <path class="stroke" d="M419.5 74.5H519.5V93.5H419.5V74.5Z"/>
       <path class="stroke" d="M524.5 74.5H572.5V93.5H524.5V74.5Z"/>
       <rect class="stroke" x="573.5" y="51.5" width="67" height="42"/>
-      ##<rect class="stroke" x="107.5" y="51.5" width="57" height="21"/>
+      <rect class="stroke" x="107.5" y="51.5" width="57" height="21"/>
       <text x="300" y="68" class="area-label">MONDA</text>
     </g>
   </a>
