@@ -447,7 +447,23 @@ if name_query:
 if selected_activities:
     df_filtered = df_filtered[df_filtered["Activity"].isin(selected_activities)]
 
-filters_applied = bool(name_query or selected_activities)
+table_filtered = df_filtered.copy()
+
+if clicked_area_key:
+    key_columns = [
+        col for col in ["_SVG_ID_KEY_", "_LOCATION_KEY_", "_ORACLE_LOCATION_KEY_"]
+        if col in table_filtered.columns
+    ]
+
+    if key_columns:
+        mask = pd.Series(False, index=table_filtered.index)
+        for col in key_columns:
+            mask = mask | (table_filtered[col] == clicked_area_key)
+        table_filtered = table_filtered[mask]
+    else:
+        table_filtered = table_filtered[table_filtered["_LOCATION_KEY_"] == clicked_area_key]
+
+filters_applied = bool(name_query or selected_activities or clicked_area_key)
 # Si existe la location ALL en el filtro, queremos iluminar todo el mapa
 has_all_location = False
 if "_LOCATION_KEY_" in df_filtered.columns:
@@ -612,49 +628,7 @@ if clicked_area_key:
         # --- Listado general de personas del área (como antes) ---
         nombres = df_filtrado["Nombre"].unique()
 
-    # --- Listado general de personas del área, con Activity ---
-    if "Activity" in df_filtrado.columns:
-        # Agrupar por nombre y juntar las activities únicas de cada persona
-        personas = (
-            df_filtrado[["Nombre", "Activity"]]
-            .fillna({"Activity": ""})
-            .groupby("Nombre")["Activity"]
-            .unique()
-            .reset_index()
-        )
-        total_personas = len(personas)
-
-        if total_personas > 0:
-            st.info(f"Se encontraron **{total_personas}** entradas de personal en esta área.")
-
-            st.markdown("##### Lista de Nombres:")
-            for _, row in personas.iterrows():
-                nombre = row["Nombre"]
-                acts = [a for a in row["Activity"] if a]  # quitar vacíos
-                if acts:
-                    # Si una persona tiene varias actividades, las juntamos con coma
-                    activity_label = ", ".join(sorted(set(acts)))
-                    st.markdown(f"- **{nombre}** — _{activity_label}_")
-                else:
-                    st.markdown(f"- **{nombre}**")
-        else:
-            st.warning(
-                "El área está cliqueada, pero no se encontraron nombres asignados "
-                "en el Excel para esa ubicación."
-            )
-    else:
-        # Fallback por si algún día no existiera la columna Activity
-        nombres = df_filtrado["Nombre"].unique()
-        if len(nombres) > 0:
-            st.info(f"Se encontraron **{len(nombres)}** entradas de personal en esta área.")
-            st.markdown("##### Lista de Nombres:")
-            for nombre in nombres:
-                st.markdown(f"- **{nombre}**")
-        else:
-            st.warning(
-                "El área está cliqueada, pero no se encontraron nombres asignados "
-                "en el Excel para esa ubicación."
-            )
+    
 
 
 else:
@@ -662,15 +636,15 @@ else:
 st.markdown("##### 🔍 Explorador de registros filtrados")
 
 if filters_applied:
-    st.caption(f"Los filtros actuales devuelven {len(df_filtered)} registro(s) del Excel.")
+    st.caption(f"Los filtros actuales devuelven {len(table_filtered)} registro(s) del Excel.")
 else:
     """"""""
 
-if df_filtered.empty:
+if table_filtered.empty:
     st.warning("No se encontraron registros que coincidan con los filtros seleccionados.")
 else:
     if display_columns:
-        filtered_table = df_filtered[display_columns].rename(
+        filtered_table = table_filtered[display_columns].rename(
             columns={location_col: "Location"}
         )
         st.dataframe(filtered_table, width="stretch")
