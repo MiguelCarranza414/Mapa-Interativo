@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 # === CONFIGURACIÓN ===
 EXCEL_PATH = Path(r"C:\Inventario\data\roles_areas.xlsx")
 SVG_PATH   = Path("data/mapa.svg")
-HELP_IMAGE_PATH = Path("data/ayuda.png")
+HELP_IMAGE_PATH = Path(r"C:\Inventario\data\ayuda.png")
 st.set_page_config(layout="wide")
 with st.container():
     st.markdown(
