@@ -263,6 +263,13 @@ a, .stCaption, .stMarkdown p {
   z-index: 1000;
 }
 
+/* Checkbox oculto que controla el modal */
+.help-checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .help-btn {
   background: linear-gradient(180deg, var(--surface), var(--navy-900));
   border: 1px solid var(--border);
@@ -282,8 +289,8 @@ a, .stCaption, .stMarkdown p {
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
 }
 
+/* Modal inicialmente oculto */
 .help-modal {
-  display: none;
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.45);
@@ -292,9 +299,12 @@ a, .stCaption, .stMarkdown p {
   justify-content: center;
   padding: 1.5rem;
   z-index: 1100;
+
+  display: none;
 }
 
-.help-modal.visible {
+/* Cuando el checkbox está marcado, mostramos el modal */
+.help-checkbox:checked ~ .help-modal {
   display: flex;
 }
 
@@ -316,6 +326,7 @@ a, .stCaption, .stMarkdown p {
   border-radius: 12px;
 }
 
+/* El botón de cerrar es también un <label> que desmarca el checkbox */
 .help-close {
   position: absolute;
   top: 10px;
@@ -335,7 +346,6 @@ a, .stCaption, .stMarkdown p {
 .help-close:hover {
   background: #e2e8f0;
 }
-
 </style>
 """
 
@@ -756,36 +766,28 @@ else:
         )
     else:
         st.info("No hay columnas disponibles para mostrar o exportar desde el Excel.")
-# --- BOTÓN DE AYUDA FLOTANTE ---
+# --- BOTÓN DE AYUDA FLOTANTE (SIN JS) ---
 if help_image_base64:
     help_button_html = f"""
-    <div class="help-widget">
-        <button id="help-toggle" class="help-btn" aria-label="Ver ayuda">
-            ❔ <span>Ayuda</span>
-        </button>
-        <div id="help-modal" class="help-modal" role="dialog" aria-modal="true">
-            <div class="help-modal-content">
-                <button id="help-close" class="help-close" aria-label="Cerrar ayuda">&times;</button>
-                <img src="data:image/png;base64,{help_image_base64}" alt="Imagen de ayuda" />
-            </div>
-        </div>
-    </div>
-    <script>
-    const helpBtn = window.document.getElementById('help-toggle');
-    const helpModal = window.document.getElementById('help-modal');
-    const helpClose = window.document.getElementById('help-close');
+<div class="help-widget">
+  <!-- Checkbox oculto que controla abrir/cerrar -->
+  <input type="checkbox" id="help-toggle" class="help-checkbox" />
 
-    if (helpBtn && helpModal && helpClose) {{
-        const toggleModal = () => helpModal.classList.toggle('visible');
-        helpBtn.addEventListener('click', toggleModal);
-        helpClose.addEventListener('click', toggleModal);
-        helpModal.addEventListener('click', (event) => {{
-            if (event.target === helpModal) {{
-                toggleModal();
-            }}
-        }});
-    }}
-    </script>
-    """
+  <!-- Botón flotante: en realidad es un label vinculado al checkbox -->
+  <label for="help-toggle" class="help-btn" aria-label="Ver ayuda">
+    ❔ <span>Ayuda</span>
+  </label>
+
+  <!-- Modal de ayuda -->
+  <div class="help-modal" role="dialog" aria-modal="true">
+    <div class="help-modal-content">
+      <!-- Botón cerrar: otro label que desmarca el checkbox -->
+      <label for="help-toggle" class="help-close" aria-label="Cerrar ayuda">&times;</label>
+      <img src="data:image/png;base64,{help_image_base64}" alt="Imagen de ayuda" />
+    </div>
+  </div>
+</div>
+"""
 
     st.markdown(help_button_html, unsafe_allow_html=True)
+
