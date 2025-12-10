@@ -1,4 +1,5 @@
 import unicodedata
+import base64
 from pathlib import Path
 import pandas as pd
 import streamlit as st
@@ -7,6 +8,7 @@ import xml.etree.ElementTree as ET
 # === CONFIGURACIÓN ===
 EXCEL_PATH = Path(r"C:\Inventario\data\roles_areas.xlsx")
 SVG_PATH   = Path("data/mapa.svg")
+HELP_IMAGE_PATH = Path("data/ayuda.png")
 st.set_page_config(layout="wide")
 with st.container():
     st.markdown(
@@ -253,6 +255,86 @@ div[data-testid="stTable"] tbody tr:hover {
 a, .stCaption, .stMarkdown p {
   color: #1d4ed8;
 }
+/* Floating help button */
+.help-widget {
+  position: fixed;
+  bottom: 18px;
+  left: 18px;
+  z-index: 1000;
+}
+
+.help-btn {
+  background: linear-gradient(180deg, var(--surface), var(--navy-900));
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.help-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
+}
+
+.help-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(1px);
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 1100;
+}
+
+.help-modal.visible {
+  display: flex;
+}
+
+.help-modal-content {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
+  max-width: min(780px, 90vw);
+  width: 100%;
+  padding: 1rem 1rem 1.25rem 1rem;
+}
+
+.help-modal-content img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+}
+
+.help-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #f1f5f9;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  box-shadow: 0 6px 15px rgba(15, 23, 42, 0.18);
+}
+
+.help-close:hover {
+  background: #e2e8f0;
+}
 
 </style>
 """
@@ -270,6 +352,11 @@ def load_excel(path: Path) -> pd.DataFrame:
 def load_svg(path: Path) -> str:
     """Carga el contenido del archivo SVG."""
     return path.read_text(encoding="utf-8")
+
+@st.cache_data(show_spinner=False)
+def load_help_image(path: Path) -> str:
+    """Devuelve la imagen codificada en base64 para incrustarla en HTML."""
+    return base64.b64encode(path.read_bytes()).decode("utf-8")
 
 def build_display_columns(dataframe: pd.DataFrame, location_column: str) -> list[str]:
     """Devuelve la lista de columnas a mostrar respetando la disponibilidad en el DataFrame."""
@@ -363,6 +450,17 @@ if not SVG_PATH.exists():
     st.stop()
 
 svg_content = load_svg(SVG_PATH)
+
+# 2.1 Carga de imagen de ayuda para el botón flotante
+help_image_base64 = None
+try:
+    if HELP_IMAGE_PATH.exists():
+        help_image_base64 = load_help_image(HELP_IMAGE_PATH)
+    else:
+        st.warning(f"ℹ️ No se encontró la imagen de ayuda en {HELP_IMAGE_PATH.resolve()}")
+except Exception as e:
+    st.warning(f"ℹ️ No pude cargar la imagen de ayuda: {e}")
+
 
 # 3. Detección de Columna 'Location'
 normalized_cols = {normalize_key(c): c for c in df.columns}
@@ -658,3 +756,36 @@ else:
         )
     else:
         st.info("No hay columnas disponibles para mostrar o exportar desde el Excel.")
+# --- BOTÓN DE AYUDA FLOTANTE ---
+if help_image_base64:
+    help_button_html = f"""
+    <div class="help-widget">
+        <button id="help-toggle" class="help-btn" aria-label="Ver ayuda">
+            ❔ <span>Ayuda</span>
+        </button>
+        <div id="help-modal" class="help-modal" role="dialog" aria-modal="true">
+            <div class="help-modal-content">
+                <button id="help-close" class="help-close" aria-label="Cerrar ayuda">&times;</button>
+                <img src="data:image/png;base64,{help_image_base64}" alt="Imagen de ayuda" />
+            </div>
+        </div>
+    </div>
+    <script>
+    const helpBtn = window.document.getElementById('help-toggle');
+    const helpModal = window.document.getElementById('help-modal');
+    const helpClose = window.document.getElementById('help-close');
+
+    if (helpBtn && helpModal && helpClose) {{
+        const toggleModal = () => helpModal.classList.toggle('visible');
+        helpBtn.addEventListener('click', toggleModal);
+        helpClose.addEventListener('click', toggleModal);
+        helpModal.addEventListener('click', (event) => {{
+            if (event.target === helpModal) {{
+                toggleModal();
+            }}
+        }});
+    }}
+    </script>
+    """
+
+    st.markdown(help_button_html, unsafe_allow_html=True)
