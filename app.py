@@ -21,13 +21,6 @@ with st.container():
         """,
         unsafe_allow_html=True
     )
-
-#st.subheader("📦 Inventario Anual 2025. Mapa interactivo de actividades, áreas y turnos.")
-#st.markdown('''Del 3 al 7 de enero del 2026 :gray-background[(Solo mesa de control del 2 al 7 de Enero del 2026)]''')
-#st.markdown('''
-    #:red[Streamlit] :orange[can] :green[write] :blue[text] :violet[in]
-    #:gray[pretty] :rainbow[colors] and :blue-background[highlight] text.''')
-
 st.divider()
 # === ESTILOS PERSONALIZADOS ===
 custom_css = """
