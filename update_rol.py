@@ -112,7 +112,7 @@ print("✅ Listo: inserté SVG_ID en la columna F y apliqué equivalencias.")
 
 #Github
 REPO = Path(r"C:\Inventario")   # carpeta donde está el .git
-MENSAJE = "Auto update: roles_auto.xlsx"
+MENSAJE = "Auto update: roles_areas.xlsx"
 
 def run(cmd: list[str]) -> None:
     r = subprocess.run(cmd, cwd=REPO, text=True, capture_output=True)
