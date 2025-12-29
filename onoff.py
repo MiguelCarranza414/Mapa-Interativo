@@ -1,12 +1,6 @@
 import subprocess
 from pathlib import Path
 from update_rol import update
-import os
-import signal
-import time
-
-os.kill(os.getpid(), signal.SIGINT)
-time.sleep(1)
 
 REPO = Path(r"C:\Inventario")
 MENSAJE = "On/Off mapa Streamlit"
